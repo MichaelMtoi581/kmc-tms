@@ -342,6 +342,11 @@ return [
             'route' => 'training-categories.index',
             'icon' => 'fas fa-fw fa-tags',
         ],
+        [
+            'text' => 'training_institutions',
+            'route' => 'training-institutions.index',
+            'icon' => 'fas fa-fw fa-university',
+        ],
         ['header' => 'trainings'],
         [
             'text' => 'planned_trainings',

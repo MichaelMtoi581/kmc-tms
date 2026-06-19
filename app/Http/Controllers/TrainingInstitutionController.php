@@ -7,59 +7,66 @@ use Illuminate\Http\Request;
 
 class TrainingInstitutionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $institutions = TrainingInstitution::orderBy('name')->get();
+
+        return view('training-institutions.index', compact('institutions'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('training-institutions.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:training_institutions,name',
+            'location' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+        ]);
+
+        TrainingInstitution::create($validated);
+
+        return redirect()
+            ->route('training-institutions.index')
+            ->with('success', 'Training institution added successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(TrainingInstitution $trainingInstitution)
     {
-        //
+        return redirect()->route('training-institutions.edit', $trainingInstitution);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(TrainingInstitution $trainingInstitution)
     {
-        //
+        return view('training-institutions.edit', ['institution' => $trainingInstitution]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, TrainingInstitution $trainingInstitution)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:training_institutions,name,' . $trainingInstitution->id,
+            'location' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+        ]);
+
+        $trainingInstitution->update($validated);
+
+        return redirect()
+            ->route('training-institutions.index')
+            ->with('success', 'Training institution updated successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(TrainingInstitution $trainingInstitution)
     {
-        //
+        $trainingInstitution->delete();
+
+        return redirect()
+            ->route('training-institutions.index')
+            ->with('success', 'Training institution deleted successfully');
     }
 }
