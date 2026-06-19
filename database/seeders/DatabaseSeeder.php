@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             TrainingCategorySeeder::class,
             TrainingInstitutionSeeder::class,
+            FundingSourceSeeder::class,
         ]);
     }
 }

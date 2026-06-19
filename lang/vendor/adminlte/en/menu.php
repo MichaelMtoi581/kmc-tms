@@ -6,6 +6,7 @@ return [
     'organization' => 'ORGANIZATION',
     'training_categories' => 'Training Categories',
     'training_institutions' => 'Training Institutions',
+    'funding_sources' => 'Funding Sources',
     'trainings' => 'TRAININGS',
     'dashboard' => 'Dashboard',
     'departments' => 'Departments',

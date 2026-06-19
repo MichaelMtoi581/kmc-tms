@@ -5,6 +5,7 @@ use App\Http\Controllers\FinancialYearController;
 use App\Http\Controllers\PlannedTrainingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\FundingSourceController;
 use App\Http\Controllers\TrainingCategoryController;
 use App\Http\Controllers\TrainingInstitutionController;
 use App\Http\Controllers\TrainingOpportunityController;
@@ -33,6 +34,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('staff',
         StaffController::class);
 
+    Route::prefix('planned-trainings')->name('planned-trainings.')->group(function () {
+        Route::get('import', [PlannedTrainingController::class, 'importForm'])->name('import');
+        Route::post('import', [PlannedTrainingController::class, 'importStore'])->name('import.store');
+    });
+
     Route::resource('planned-trainings',
         PlannedTrainingController::class);
 
@@ -47,6 +53,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('training-institutions',
         TrainingInstitutionController::class);
+
+    Route::resource('funding-sources',
+        FundingSourceController::class);
 
 });
 

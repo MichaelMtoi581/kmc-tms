@@ -7,59 +7,62 @@ use Illuminate\Http\Request;
 
 class FundingSourceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $sources = FundingSource::orderBy('name')->get();
+
+        return view('funding-sources.index', compact('sources'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('funding-sources.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:funding_sources,name',
+            'description' => 'nullable|string',
+        ]);
+
+        FundingSource::create($validated);
+
+        return redirect()
+            ->route('funding-sources.index')
+            ->with('success', 'Funding source added successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(FundingSource $fundingSource)
     {
-        //
+        return redirect()->route('funding-sources.edit', $fundingSource);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(FundingSource $fundingSource)
     {
-        //
+        return view('funding-sources.edit', ['source' => $fundingSource]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, FundingSource $fundingSource)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:funding_sources,name,' . $fundingSource->id,
+            'description' => 'nullable|string',
+        ]);
+
+        $fundingSource->update($validated);
+
+        return redirect()
+            ->route('funding-sources.index')
+            ->with('success', 'Funding source updated successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(FundingSource $fundingSource)
     {
-        //
+        $fundingSource->delete();
+
+        return redirect()
+            ->route('funding-sources.index')
+            ->with('success', 'Funding source deleted successfully');
     }
 }

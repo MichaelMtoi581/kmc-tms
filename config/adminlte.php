@@ -347,6 +347,11 @@ return [
             'route' => 'training-institutions.index',
             'icon' => 'fas fa-fw fa-university',
         ],
+        [
+            'text' => 'funding_sources',
+            'route' => 'funding-sources.index',
+            'icon' => 'fas fa-fw fa-coins',
+        ],
         ['header' => 'trainings'],
         [
             'text' => 'planned_trainings',
