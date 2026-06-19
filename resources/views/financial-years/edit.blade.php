@@ -1,13 +1,14 @@
-@extends('layouts.app')
+@extends('adminlte::page')
 
 @section('content')
+    
 
 <div class="container">
 
-<form @method('PUT')"
+<form method="POST"
       action="{{ route('financial-years.update',$financialYear->id) }}">
-
     @csrf
+    @method('PUT')
 
     <div class="card">
 

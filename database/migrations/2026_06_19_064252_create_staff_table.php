@@ -13,6 +13,23 @@ return new class extends Migration
     {
         Schema::create('staff', function (Blueprint $table) {
             $table->id();
+
+            $table->string('check_number')->unique();
+
+            $table->string('first_name');
+            $table->string('middle_name')->nullable();
+            $table->string('last_name');
+
+            $table->enum('gender', ['Male', 'Female']);
+            $table->date('date_of_birth')->nullable();
+
+            $table->string('designation');
+            $table->string('education_level')->nullable();
+
+            $table->foreignId('department_id')
+                  ->constrained()
+                  ->restrictOnDelete();
+
             $table->timestamps();
         });
     }
