@@ -4,6 +4,7 @@ return [
 
     'main_navigation' => 'MAIN NAVIGATION',
     'organization' => 'ORGANIZATION',
+    'training_categories' => 'Training Categories',
     'trainings' => 'TRAININGS',
     'dashboard' => 'Dashboard',
     'departments' => 'Departments',

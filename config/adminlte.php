@@ -337,6 +337,11 @@ return [
             'route' => 'financial-years.index',
             'icon' => 'fas fa-fw fa-calendar-alt',
         ],
+        [
+            'text' => 'training_categories',
+            'route' => 'training-categories.index',
+            'icon' => 'fas fa-fw fa-tags',
+        ],
         ['header' => 'trainings'],
         [
             'text' => 'planned_trainings',

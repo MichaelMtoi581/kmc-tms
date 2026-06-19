@@ -5,6 +5,7 @@ use App\Http\Controllers\FinancialYearController;
 use App\Http\Controllers\PlannedTrainingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\TrainingCategoryController;
 use App\Http\Controllers\TrainingOpportunityController;
 use App\Http\Controllers\UnplannedTrainingController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('training-opportunities',
         TrainingOpportunityController::class);
 
+    Route::resource('training-categories',
+        TrainingCategoryController::class);
 
 });
 

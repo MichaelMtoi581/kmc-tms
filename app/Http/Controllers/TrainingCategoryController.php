@@ -7,59 +7,60 @@ use Illuminate\Http\Request;
 
 class TrainingCategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $categories = TrainingCategory::orderBy('name')->get();
+
+        return view('training-categories.index', compact('categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(TrainingCategory $trainingCategory)
     {
-        //
+        return redirect()->route('training-categories.edit', $trainingCategory);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    public function create()
+    {
+        return view('training-categories.create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:training_categories,name',
+        ]);
+
+        TrainingCategory::create($validated);
+
+        return redirect()
+            ->route('training-categories.index')
+            ->with('success', 'Training category added successfully');
+    }
+
     public function edit(TrainingCategory $trainingCategory)
     {
-        //
+        return view('training-categories.edit', ['category' => $trainingCategory]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, TrainingCategory $trainingCategory)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:training_categories,name,' . $trainingCategory->id,
+        ]);
+
+        $trainingCategory->update($validated);
+
+        return redirect()
+            ->route('training-categories.index')
+            ->with('success', 'Training category updated successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(TrainingCategory $trainingCategory)
     {
-        //
+        $trainingCategory->delete();
+
+        return redirect()
+            ->route('training-categories.index')
+            ->with('success', 'Training category deleted successfully');
     }
 }
