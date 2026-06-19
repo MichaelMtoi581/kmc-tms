@@ -42,6 +42,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('planned-trainings',
         PlannedTrainingController::class);
 
+    Route::prefix('unplanned-trainings')->name('unplanned-trainings.')->group(function () {
+        Route::get('import', [UnplannedTrainingController::class, 'importForm'])->name('import');
+        Route::post('import', [UnplannedTrainingController::class, 'importStore'])->name('import.store');
+    });
+
     Route::resource('unplanned-trainings',
         UnplannedTrainingController::class);
 
