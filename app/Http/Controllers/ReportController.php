@@ -77,7 +77,7 @@ class ReportController extends Controller
             $query->where('source', $request->source);
         }
 
-        if ($request->format === 'xlsx') {
+        if ($request->input('format') === 'xlsx') {
             $all = $query->orderBy('created_at', 'desc')->get();
             return $this->exportExcel($all->map(fn($t) => [
                 $t->training_type,
@@ -310,7 +310,7 @@ class ReportController extends Controller
             default => abort(404),
         };
 
-        if ($request->format === 'pdf') {
+        if ($request->input('format') === 'pdf') {
             $pdf = app('dompdf.wrapper');
             $pdf->loadView('report.export-pdf', [
                 'title' => $titles[$type],
@@ -515,6 +515,7 @@ class ReportController extends Controller
         ];
     }
 
+    /** @return \Illuminate\Database\Query\Builder */
     private function unionQuery()
     {
         $plannedQ = PlannedTraining::select(
