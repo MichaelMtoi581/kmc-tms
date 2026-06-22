@@ -117,6 +117,17 @@
                 <i class="fas fa-table mr-1"></i> Training Records
                 <span class="badge badge-info ml-2">{{ $trainings->total() }} total</span>
             </h3>
+            <div class="card-tools">
+                <a href="{{ route('reports.export', ['type' => 'summary', 'format' => 'xlsx'] + request()->query()) }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-file-excel mr-1"></i> Excel
+                </a>
+                <a href="{{ route('reports.export', ['type' => 'summary', 'format' => 'pdf'] + request()->query()) }}" class="btn btn-danger btn-sm">
+                    <i class="fas fa-file-pdf mr-1"></i> PDF
+                </a>
+                <button onclick="window.print()" class="btn btn-default btn-sm">
+                    <i class="fas fa-print mr-1"></i> Print
+                </button>
+            </div>
         </div>
         <div class="card-body">
             <table id="summary-table" class="table table-bordered table-striped" style="width:100%">
@@ -178,6 +189,19 @@
         </div>
     </div>
 
+@endsection
+
+@section('adminlte_css')
+<style>
+@media print {
+    .main-header, .main-sidebar, .content-header, .card-header .card-tools, .breadcrumb, nav { display: none !important; }
+    .content-wrapper, .main-footer { margin-left: 0 !important; padding-top: 0 !important; }
+    .card { border: none !important; box-shadow: none !important; }
+    .card-header { padding: 10px 0 !important; }
+    body { font-size: 11px; }
+    table { width: 100% !important; }
+}
+</style>
 @endsection
 
 @section('js')

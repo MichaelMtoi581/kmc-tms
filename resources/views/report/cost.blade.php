@@ -106,9 +106,20 @@
     <div class="row">
         <div class="col-md-6">
             <div class="card card-info card-outline">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-table mr-1"></i> Funding Source Breakdown</h3>
-                </div>
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-table mr-1"></i> Funding Source Breakdown</h3>
+            <div class="card-tools">
+                <a href="{{ route('reports.export', ['type' => 'cost', 'format' => 'xlsx'] + request()->query()) }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-file-excel mr-1"></i> Excel
+                </a>
+                <a href="{{ route('reports.export', ['type' => 'cost', 'format' => 'pdf'] + request()->query()) }}" class="btn btn-danger btn-sm">
+                    <i class="fas fa-file-pdf mr-1"></i> PDF
+                </a>
+                <button onclick="window.print()" class="btn btn-default btn-sm">
+                    <i class="fas fa-print mr-1"></i> Print
+                </button>
+            </div>
+        </div>
                 <div class="card-body p-0">
                     <table class="table table-sm table-striped mb-0">
                         <thead>
@@ -226,4 +237,16 @@ $(function () {
     });
 });
 </script>
+@endsection
+
+@section('adminlte_css')
+<style>
+@media print {
+    .main-header, .main-sidebar, .content-header .card-tools, .breadcrumb, nav { display: none !important; }
+    .content-wrapper, .main-footer { margin-left: 0 !important; padding-top: 0 !important; }
+    .card { border: none !important; box-shadow: none !important; }
+    .card-header { padding: 10px 0 !important; }
+    body { font-size: 11px; }
+}
+</style>
 @endsection

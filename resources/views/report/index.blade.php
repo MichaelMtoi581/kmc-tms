@@ -255,3 +255,15 @@ $(function () {
 });
 </script>
 @endsection
+
+@section('adminlte_css')
+<style>
+@media print {
+    .main-header, .main-sidebar, .content-header .card-tools, .breadcrumb, nav { display: none !important; }
+    .content-wrapper, .main-footer { margin-left: 0 !important; padding-top: 0 !important; }
+    .card { border: none !important; box-shadow: none !important; }
+    .card-header { padding: 10px 0 !important; }
+    body { font-size: 11px; }
+}
+</style>
+@endsection

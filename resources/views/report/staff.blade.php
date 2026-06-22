@@ -88,7 +88,13 @@
                     <span class="badge badge-info ml-2">{{ $staffData->total_trainings }} records</span>
                 </h3>
                 <div class="card-tools">
-                    <button onclick="window.print()" class="btn btn-default btn-sm"><i class="fas fa-print mr-1"></i>Print</button>
+                    <a href="{{ route('reports.export', ['type' => 'staff', 'format' => 'xlsx', 'staff_id' => $staffId]) }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-file-excel mr-1"></i> Excel
+                    </a>
+                    <a href="{{ route('reports.export', ['type' => 'staff', 'format' => 'pdf', 'staff_id' => $staffId]) }}" class="btn btn-danger btn-sm">
+                        <i class="fas fa-file-pdf mr-1"></i> PDF
+                    </a>
+                    <button onclick="window.print()" class="btn btn-default btn-sm"><i class="fas fa-print mr-1"></i> Print</button>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -171,3 +177,16 @@ $(function () {
 });
 </script>
 @endsection
+
+@section('adminlte_css')
+<style>
+@media print {
+    .main-header, .main-sidebar, .content-header .card-tools, .breadcrumb, nav { display: none !important; }
+    .content-wrapper, .main-footer { margin-left: 0 !important; padding-top: 0 !important; }
+    .card { border: none !important; box-shadow: none !important; }
+    .card-header { padding: 10px 0 !important; }
+    body { font-size: 11px; }
+}
+</style>
+@endsection
+

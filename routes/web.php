@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::get('financial', [\App\Http\Controllers\ReportController::class, 'financialReport'])->name('financial');
         Route::get('cost', [\App\Http\Controllers\ReportController::class, 'costReport'])->name('cost');
         Route::get('status', [\App\Http\Controllers\ReportController::class, 'statusReport'])->name('status');
+        Route::get('export/{type}', [\App\Http\Controllers\ReportController::class, 'export'])->name('export');
     });
 
 });
