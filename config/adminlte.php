@@ -363,6 +363,42 @@ return [
             'route' => 'unplanned-trainings.index',
             'icon' => 'fas fa-fw fa-clipboard',
         ],
+        ['header' => 'reports_header'],
+        [
+            'text' => 'reports_dashboard',
+            'route' => 'reports.index',
+            'icon' => 'fas fa-fw fa-chart-pie',
+        ],
+        [
+            'text' => 'training_summary',
+            'route' => 'reports.training-summary',
+            'icon' => 'fas fa-fw fa-list',
+        ],
+        [
+            'text' => 'department_report',
+            'route' => 'reports.department',
+            'icon' => 'fas fa-fw fa-building',
+        ],
+        [
+            'text' => 'staff_report',
+            'route' => 'reports.staff',
+            'icon' => 'fas fa-fw fa-user-graduate',
+        ],
+        [
+            'text' => 'financial_report',
+            'route' => 'reports.financial',
+            'icon' => 'fas fa-fw fa-calendar-alt',
+        ],
+        [
+            'text' => 'cost_report',
+            'route' => 'reports.cost',
+            'icon' => 'fas fa-fw fa-coins',
+        ],
+        [
+            'text' => 'status_report',
+            'route' => 'reports.status',
+            'icon' => 'fas fa-fw fa-check-circle',
+        ],
     ],
 
     /*

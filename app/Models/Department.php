@@ -19,4 +19,14 @@ class Department extends Model
     {
         return $this->hasMany(Staff::class);
     }
+
+    public function plannedTraining()
+    {
+        return $this->hasMany(PlannedTraining::class);
+    }
+
+    public function unplannedTraining()
+    {
+        return $this->hasMany(UnplannedTraining::class);
+    }
 }

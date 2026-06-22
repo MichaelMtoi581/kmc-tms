@@ -62,6 +62,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('funding-sources',
         FundingSourceController::class);
 
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ReportController::class, 'index'])->name('index');
+        Route::get('training-summary', [\App\Http\Controllers\ReportController::class, 'trainingSummary'])->name('training-summary');
+        Route::get('department', [\App\Http\Controllers\ReportController::class, 'departmentReport'])->name('department');
+        Route::get('staff', [\App\Http\Controllers\ReportController::class, 'staffReport'])->name('staff');
+        Route::get('financial', [\App\Http\Controllers\ReportController::class, 'financialReport'])->name('financial');
+        Route::get('cost', [\App\Http\Controllers\ReportController::class, 'costReport'])->name('cost');
+        Route::get('status', [\App\Http\Controllers\ReportController::class, 'statusReport'])->name('status');
+    });
+
 });
 
 require __DIR__.'/auth.php';
