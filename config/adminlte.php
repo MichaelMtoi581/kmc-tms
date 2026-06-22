@@ -363,11 +363,6 @@ return [
             'route' => 'unplanned-trainings.index',
             'icon' => 'fas fa-fw fa-clipboard',
         ],
-        [
-            'text' => 'training_opportunities',
-            'route' => 'training-opportunities.index',
-            'icon' => 'fas fa-fw fa-graduation-cap',
-        ],
     ],
 
     /*

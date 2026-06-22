@@ -14,5 +14,4 @@ return [
     'financial_years' => 'Financial Years',
     'planned_trainings' => 'Planned Trainings',
     'unplanned_trainings' => 'Unplanned Trainings',
-    'training_opportunities' => 'Training Opportunities',
 ];
