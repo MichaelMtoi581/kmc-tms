@@ -309,6 +309,14 @@ return [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
+        [
+            'type' => 'darkmode-widget',
+            'topnav_right' => true,
+            'icon_enabled' => 'fas fa-sun',
+            'color_enabled' => 'warning',
+            'icon_disabled' => 'fas fa-moon',
+            'color_disabled' => 'secondary',
+        ],
 
         // Sidebar items:
         [
