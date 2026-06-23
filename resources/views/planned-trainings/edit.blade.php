@@ -177,6 +177,14 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label>Duration</label>
+                            <div>
+                                <span id="duration-badge" class="badge badge-{{ $plannedTraining->duration_type === 'Long' ? 'danger' : 'success' }}">{{ $plannedTraining->duration_type }}</span>
+                                <small class="text-muted ml-2">Auto-calculated from dates</small>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -270,6 +278,27 @@
                 theme: 'bootstrap4',
                 width: '100%'
             });
+
+            function calcDuration() {
+                var start = $('#start_date').val();
+                var end = $('#end_date').val();
+                var $badge = $('#duration-badge');
+
+                if (start && end) {
+                    var s = new Date(start);
+                    var e = new Date(end);
+                    var months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+                    if (months >= 6) {
+                        $badge.text('Long').removeClass('badge-success').addClass('badge-danger');
+                    } else {
+                        $badge.text('Short').removeClass('badge-danger').addClass('badge-success');
+                    }
+                } else {
+                    $badge.text('Short').removeClass('badge-danger').addClass('badge-success');
+                }
+            }
+
+            $('#start_date, #end_date').on('change', calcDuration);
         });
     </script>
 @endsection

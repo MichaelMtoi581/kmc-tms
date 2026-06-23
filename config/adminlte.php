@@ -399,6 +399,11 @@ return [
             'route' => 'reports.status',
             'icon' => 'fas fa-fw fa-check-circle',
         ],
+        [
+            'text' => 'duration_report',
+            'route' => 'reports.duration',
+            'icon' => 'fas fa-fw fa-clock',
+        ],
     ],
 
     /*

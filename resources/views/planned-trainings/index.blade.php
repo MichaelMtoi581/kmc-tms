@@ -118,6 +118,7 @@
                         <th>Department</th>
                         <th>Financial Year</th>
                         <th>Category</th>
+                        <th>Duration</th>
                         <th>Cost (TZS)</th>
                         <th>Status</th>
                         <th class="text-center" style="width:100px">Action</th>
@@ -139,6 +140,11 @@
                         <td>{{ $training->department?->name ?? '—' }}</td>
                         <td>{{ $training->financialYear?->year_name ?? '—' }}</td>
                         <td>{{ $training->trainingCategory?->name ?? '—' }}</td>
+                        <td>
+                            <span class="badge badge-{{ $training->duration_type === 'Long' ? 'danger' : 'success' }}">
+                                {{ $training->duration_type }}
+                            </span>
+                        </td>
                         <td class="text-right">{{ number_format($training->cost, 0) }}</td>
                         <td>
                             @php
@@ -181,7 +187,7 @@
                 @empty
 
                     <tr>
-                        <td colspan="9" class="text-center text-muted py-4">
+                        <td colspan="10" class="text-center text-muted py-4">
                             <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
                             No planned trainings found.
                             <a href="{{ route('planned-trainings.create') }}">Add one</a> or

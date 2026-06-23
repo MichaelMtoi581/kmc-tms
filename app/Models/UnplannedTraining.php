@@ -19,6 +19,7 @@ class UnplannedTraining extends Model
         'venue',
         'cost',
         'status',
+        'duration_type',
         'source',
         'description',
         'remarks',
@@ -31,6 +32,20 @@ class UnplannedTraining extends Model
             'end_date' => 'date',
             'cost' => 'decimal:2',
         ];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($training) {
+            if ($training->start_date && $training->end_date) {
+                $months = $training->start_date->diffInMonths($training->end_date);
+                $training->duration_type = $months >= 6 ? 'Long' : 'Short';
+            } else {
+                $training->duration_type = 'Short';
+            }
+        });
     }
 
     public function staff()

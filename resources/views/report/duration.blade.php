@@ -1,48 +1,57 @@
 @extends('adminlte::page')
 
-@section('title', 'Training Summary Report')
+@section('title', 'Training Duration Report')
 
 @section('plugins.Datatables', true)
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-list mr-2"></i>Training Summary Report</h1>
+        <h1><i class="fas fa-clock mr-2"></i>Training Duration Report</h1>
         <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
             <li class="breadcrumb-item"><a href="{{ route('reports.index') }}">Reports</a></li>
-            <li class="breadcrumb-item active">Training Summary</li>
+            <li class="breadcrumb-item active">Duration Report</li>
         </ol>
     </div>
-@endsection
+@stop
 
 @section('content')
 
     <div class="row">
-        <div class="col-lg-4 col-6">
-            <div class="small-box bg-info">
-                <div class="inner">
-                    <h3>{{ $summary->total }}</h3>
-                    <p>Total Trainings</p>
-                </div>
-                <div class="icon"><i class="fas fa-graduation-cap"></i></div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-6">
+        <div class="col-lg-3 col-6">
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>{{ number_format($summary->totalCost, 0) }}</h3>
-                    <p>Total Cost (TZS)</p>
+                    <h3>{{ $totalShort }}</h3>
+                    <p>Short Training</p>
+                </div>
+                <div class="icon"><i class="fas fa-hourglass-start"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+                <div class="inner">
+                    <h3>{{ $totalLong }}</h3>
+                    <p>Long Training</p>
+                </div>
+                <div class="icon"><i class="fas fa-hourglass-end"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>{{ number_format($costShort, 0) }}</h3>
+                    <p>Short Training Cost (TZS)</p>
                 </div>
                 <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
             </div>
         </div>
-        <div class="col-lg-4 col-6">
+        <div class="col-lg-3 col-6">
             <div class="small-box bg-warning">
                 <div class="inner">
-                    <h3>{{ number_format($summary->avgCost, 0) }}</h3>
-                    <p>Average Cost (TZS)</p>
+                    <h3>{{ number_format($costLong, 0) }}</h3>
+                    <p>Long Training Cost (TZS)</p>
                 </div>
-                <div class="icon"><i class="fas fa-calculator"></i></div>
+                <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
             </div>
         </div>
     </div>
@@ -77,33 +86,6 @@
                     </select>
                 </div>
                 <div class="form-group mr-2 mb-2">
-                    <select name="training_category_id" class="form-control form-control-sm">
-                        <option value="">All Categories</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}" {{ request('training_category_id') == $cat->id ? 'selected' : '' }}>
-                                {{ $cat->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="form-group mr-2 mb-2">
-                    <select name="status" class="form-control form-control-sm">
-                        <option value="">All Status</option>
-                        <option value="Planned" {{ request('status') == 'Planned' ? 'selected' : '' }}>Planned</option>
-                        <option value="Ongoing" {{ request('status') == 'Ongoing' ? 'selected' : '' }}>Ongoing</option>
-                        <option value="Completed" {{ request('status') == 'Completed' ? 'selected' : '' }}>Completed</option>
-                        <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                    </select>
-                </div>
-                <div class="form-group mr-2 mb-2">
-                    <select name="source" class="form-control form-control-sm">
-                        <option value="">All Sources</option>
-                        <option value="Planned" {{ request('source') == 'Planned' ? 'selected' : '' }}>Planned</option>
-                        <option value="Unplanned" {{ request('source') == 'Unplanned' ? 'selected' : '' }}>Unplanned</option>
-                        <option value="manual" {{ request('source') == 'manual' ? 'selected' : '' }}>Manual Import</option>
-                    </select>
-                </div>
-                <div class="form-group mr-2 mb-2">
                     <select name="duration_type" class="form-control form-control-sm">
                         <option value="">All Durations</option>
                         <option value="Short" {{ request('duration_type') == 'Short' ? 'selected' : '' }}>Short</option>
@@ -112,7 +94,7 @@
                 </div>
                 <div class="mb-2">
                     <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search mr-1"></i>Filter</button>
-                    <a href="{{ route('reports.training-summary') }}" class="btn btn-secondary btn-sm"><i class="fas fa-undo mr-1"></i>Reset</a>
+                    <a href="{{ route('reports.duration') }}" class="btn btn-secondary btn-sm"><i class="fas fa-undo mr-1"></i>Reset</a>
                 </div>
             </form>
         </div>
@@ -125,10 +107,10 @@
                 <span class="badge badge-info ml-2">{{ $trainings->total() }} total</span>
             </h3>
             <div class="card-tools">
-                <a href="{{ route('reports.export', ['type' => 'summary', 'format' => 'xlsx'] + request()->query()) }}" class="btn btn-success btn-sm">
+                <a href="{{ route('reports.export', ['type' => 'duration', 'format' => 'xlsx'] + request()->query()) }}" class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel mr-1"></i> Excel
                 </a>
-                <a href="{{ route('reports.export', ['type' => 'summary', 'format' => 'pdf'] + request()->query()) }}" class="btn btn-danger btn-sm">
+                <a href="{{ route('reports.export', ['type' => 'duration', 'format' => 'pdf'] + request()->query()) }}" class="btn btn-danger btn-sm">
                     <i class="fas fa-file-pdf mr-1"></i> PDF
                 </a>
                 <button onclick="window.print()" class="btn btn-default btn-sm">
@@ -137,7 +119,7 @@
             </div>
         </div>
         <div class="card-body">
-            <table id="summary-table" class="table table-bordered table-striped" style="width:100%">
+            <table id="duration-table" class="table table-bordered table-striped" style="width:100%">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -202,7 +184,7 @@
         </div>
     </div>
 
-@endsection
+@stop
 
 @section('adminlte_css')
 <style>
@@ -215,12 +197,12 @@
     table { width: 100% !important; }
 }
 </style>
-@endsection
+@stop
 
 @section('js')
 <script>
 $(function () {
-    $('#summary-table').DataTable({
+    $('#duration-table').DataTable({
         paging: false,
         info: false,
         order: [[0, 'desc']],
@@ -228,4 +210,4 @@ $(function () {
     });
 });
 </script>
-@endsection
+@stop

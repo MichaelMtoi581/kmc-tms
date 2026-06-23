@@ -22,4 +22,5 @@ return [
     'financial_report' => 'Financial Year',
     'cost_report' => 'Cost Analysis',
     'status_report' => 'Status Report',
+    'duration_report' => 'Duration Report',
 ];

@@ -17,6 +17,33 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
+    /**
+     * Build training-summary rows for a (already filtered) union query,
+     * resolving staff/department/year/category names via pre-loaded maps
+     * instead of running 4 queries per row.
+     */
+    private function summaryRows($query): array
+    {
+        $trainings = $query->orderBy('created_at', 'desc')->get();
+
+        $staffMap = Staff::all()->keyBy('id');
+        $deptMap = Department::all()->keyBy('id');
+        $yearMap = FinancialYear::all()->keyBy('id');
+        $catMap = TrainingCategory::all()->keyBy('id');
+
+        return $trainings->map(fn ($t) => [
+            $t->training_type,
+            $t->course_title,
+            $staffMap->get($t->staff_id)?->full_name ?? '—',
+            $deptMap->get($t->department_id)?->name ?? '—',
+            $yearMap->get($t->financial_year_id)?->year_name ?? '—',
+            $catMap->get($t->training_category_id)?->name ?? '—',
+            $t->duration_type,
+            $t->cost,
+            $t->status,
+        ])->toArray();
+    }
+
     public function index()
     {
         $plannedCount = PlannedTraining::count();
@@ -76,19 +103,13 @@ class ReportController extends Controller
         if ($request->filled('source')) {
             $query->where('source', $request->source);
         }
+        if ($request->filled('duration_type')) {
+            $query->where('duration_type', $request->duration_type);
+        }
 
         if ($request->input('format') === 'xlsx') {
-            $all = $query->orderBy('created_at', 'desc')->get();
-            return $this->exportExcel($all->map(fn($t) => [
-                $t->training_type,
-                $t->course_title,
-                optional(Staff::find($t->staff_id))->full_name ?? '—',
-                optional(Department::find($t->department_id))->name ?? '—',
-                optional(FinancialYear::find($t->financial_year_id))->year_name ?? '—',
-                optional(TrainingCategory::find($t->training_category_id))->name ?? '—',
-                $t->cost,
-                $t->status,
-            ]), ['Type', 'Course Title', 'Staff', 'Department', 'Financial Year', 'Category', 'Cost (TZS)', 'Status'], 'training-summary');
+            $rows = $this->summaryRows(clone $query);
+            return $this->exportExcel($rows, ['Type', 'Course Title', 'Staff', 'Department', 'Financial Year', 'Category', 'Cost (TZS)', 'Status'], 'training-summary');
         }
 
         $totalCost = (clone $query)->sum('cost');
@@ -287,6 +308,36 @@ class ReportController extends Controller
         ));
     }
 
+    public function durationReport(Request $request)
+    {
+        $query = $this->unionQuery();
+
+        if ($request->filled('financial_year_id')) {
+            $query->where('financial_year_id', $request->financial_year_id);
+        }
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+        if ($request->filled('duration_type')) {
+            $query->where('duration_type', $request->duration_type);
+        }
+
+        $totalShort = (clone $query)->where('duration_type', 'Short')->count();
+        $totalLong = (clone $query)->where('duration_type', 'Long')->count();
+        $costShort = (clone $query)->where('duration_type', 'Short')->sum('cost');
+        $costLong = (clone $query)->where('duration_type', 'Long')->sum('cost');
+
+        $trainings = $query->orderBy('created_at', 'desc')->paginate(25)->withQueryString();
+
+        $financialYears = FinancialYear::orderBy('year_name', 'desc')->get();
+        $departments = Department::orderBy('name')->get();
+
+        return view('report.duration', compact(
+            'trainings', 'financialYears', 'departments',
+            'totalShort', 'totalLong', 'costShort', 'costLong'
+        ));
+    }
+
     public function export($type, Request $request)
     {
         $request->validate(['format' => 'required|in:xlsx,pdf']);
@@ -298,6 +349,7 @@ class ReportController extends Controller
             'financial' => 'Financial Year Report',
             'cost' => 'Training Cost Analysis',
             'status' => 'Training Status Report',
+            'duration' => 'Training Duration Report',
         ];
 
         $data = match ($type) {
@@ -307,6 +359,7 @@ class ReportController extends Controller
             'financial' => $this->exportFinancialData(),
             'cost' => $this->exportCostData($request),
             'status' => $this->exportStatusData(),
+            'duration' => $this->exportDurationData($request),
             default => abort(404),
         };
 
@@ -344,24 +397,15 @@ class ReportController extends Controller
         if ($request->filled('status')) $query->where('status', $request->status);
         if ($request->filled('source')) $query->where('source', $request->source);
 
-        $rows = $query->orderBy('created_at', 'desc')->get()->map(fn($t) => [
-            $t->training_type,
-            $t->course_title,
-            optional(Staff::find($t->staff_id))->full_name ?? '—',
-            optional(Department::find($t->department_id))->name ?? '—',
-            optional(FinancialYear::find($t->financial_year_id))->year_name ?? '—',
-            optional(TrainingCategory::find($t->training_category_id))->name ?? '—',
-            $t->cost,
-            $t->status,
-        ])->toArray();
+        $rows = $this->summaryRows(clone $query);
 
-        $filters = collect(['financial_year_id', 'department_id', 'training_category_id', 'status', 'source'])
+        $filters = collect(['financial_year_id', 'department_id', 'training_category_id', 'status', 'source', 'duration_type'])
             ->filter(fn($f) => $request->filled($f))
             ->map(fn($f) => ucwords(str_replace('_', ' ', $f)) . ': ' . $request->$f)
             ->implode(' | ');
 
         return [
-            'headings' => ['Type', 'Course Title', 'Staff', 'Department', 'Financial Year', 'Category', 'Cost (TZS)', 'Status'],
+            'headings' => ['Type', 'Course Title', 'Staff', 'Department', 'Financial Year', 'Category', 'Duration', 'Cost (TZS)', 'Status'],
             'rows' => $rows,
             'filename' => 'training-summary-' . now()->format('Y-m-d') . '.xlsx',
             'subtitle' => $filters ?: null,
@@ -488,6 +532,23 @@ class ReportController extends Controller
         ];
     }
 
+    private function exportDurationData(Request $request): array
+    {
+        $query = $this->unionQuery();
+        if ($request->filled('financial_year_id')) $query->where('financial_year_id', $request->financial_year_id);
+        if ($request->filled('department_id')) $query->where('department_id', $request->department_id);
+        if ($request->filled('duration_type')) $query->where('duration_type', $request->duration_type);
+
+        $rows = $this->summaryRows(clone $query);
+
+        return [
+            'headings' => ['Type', 'Course Title', 'Staff', 'Department', 'Financial Year', 'Category', 'Duration', 'Cost (TZS)', 'Status'],
+            'rows' => $rows,
+            'filename' => 'training-duration-' . now()->format('Y-m-d') . '.xlsx',
+            'subtitle' => 'Training Duration Report',
+        ];
+    }
+
     private function exportStatusData(): array
     {
         $statuses = ['Planned', 'Ongoing', 'Completed', 'Cancelled'];
@@ -523,7 +584,7 @@ class ReportController extends Controller
             'id', 'course_title', 'staff_id', 'department_id',
             'financial_year_id', 'training_category_id',
             'training_institution_id', 'funding_source_id',
-            'start_date', 'end_date', 'venue', 'cost', 'status', 'source',
+            'start_date', 'end_date', 'venue', 'cost', 'status', 'duration_type', 'source',
             'description', 'remarks', 'created_at', 'updated_at'
         );
 
@@ -532,7 +593,7 @@ class ReportController extends Controller
             'id', 'course_title', 'staff_id', 'department_id',
             'financial_year_id', 'training_category_id',
             'training_institution_id', 'funding_source_id',
-            'start_date', 'end_date', 'venue', 'cost', 'status', 'source',
+            'start_date', 'end_date', 'venue', 'cost', 'status', 'duration_type', 'source',
             'description', 'remarks', 'created_at', 'updated_at'
         );
 
@@ -544,7 +605,7 @@ class ReportController extends Controller
                 'training_type', 'id', 'course_title',
                 'staff_id', 'department_id', 'financial_year_id',
                 'training_category_id', 'training_institution_id', 'funding_source_id',
-                'start_date', 'end_date', 'venue', 'cost', 'status', 'source',
+                'start_date', 'end_date', 'venue', 'cost', 'status', 'duration_type', 'source',
                 'description', 'remarks', 'created_at', 'updated_at'
             );
     }

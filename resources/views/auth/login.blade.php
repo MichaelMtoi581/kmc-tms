@@ -58,13 +58,4 @@
 @stop
 
 @section('auth_footer')
-    <p class="my-0">
-        <a href="{{ route('password.request') }}">I forgot my password</a>
-    </p>
-
-    @if (Route::has('register'))
-        <p class="my-0">
-            <a href="{{ route('register') }}">Register a new membership</a>
-        </p>
-    @endif
 @stop

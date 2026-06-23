@@ -97,6 +97,14 @@
                             </td>
                         </tr>
                         <tr>
+                            <th>Duration</th>
+                            <td>
+                                <span class="badge badge-{{ $unplannedTraining->duration_type === 'Long' ? 'danger' : 'success' }}">
+                                    {{ $unplannedTraining->duration_type }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
                             <th>Source</th>
                             <td>
                                 <span class="badge badge-{{ $unplannedTraining->source === 'import' ? 'info' : 'secondary' }}">

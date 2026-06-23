@@ -192,6 +192,11 @@
                                 <i class="fas fa-check-circle"></i> Status Report
                             </a>
                         </div>
+                        <div class="col-md-3 col-6">
+                            <a href="{{ route('reports.duration') }}" class="btn btn-app btn-block bg-dark">
+                                <i class="fas fa-clock"></i> Duration Report
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
