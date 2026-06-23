@@ -109,7 +109,7 @@ class ReportController extends Controller
 
         if ($request->input('format') === 'xlsx') {
             $rows = $this->summaryRows(clone $query);
-            return $this->exportExcel($rows, ['Type', 'Course Title', 'Staff', 'Department', 'Financial Year', 'Category', 'Cost (TZS)', 'Status'], 'training-summary');
+            return $this->exportExcel($rows, ['Type', 'Course Title', 'Staff', 'Department', 'Financial Year', 'Category', 'Duration', 'Cost (TZS)', 'Status'], 'training-summary');
         }
 
         $totalCost = (clone $query)->sum('cost');
