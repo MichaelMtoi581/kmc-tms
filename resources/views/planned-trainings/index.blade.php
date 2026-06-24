@@ -211,7 +211,7 @@
     <script>
         $(function () {
             $('#trainings-table').DataTable({
-                order: [[0, 'desc']],
+                order: [[0, 'asc']],
                 language: {
                     search: '',
                     searchPlaceholder: 'Search trainings...'
