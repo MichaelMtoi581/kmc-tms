@@ -43,7 +43,7 @@
     </table>
 
     <div class="footer">
-        Generated on {{ now()->format('d/m/Y H:i') }} | KMC - Training Management System
+        Generated on {{ now()->format('d/m/Y H:i') }} | TMIS - Training Management Information System
     </div>
 </body>
 </html>

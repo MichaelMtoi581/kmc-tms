@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'KMC - TMS',
+    'title' => 'TMIS (Training Management Information System)',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -63,12 +63,12 @@ return [
     |
     */
 
-    'logo' => '<b>KMC</b> - TMS',
+    'logo' => '<b>TMIS</b>',
     'logo_img' => 'vendor/adminlte/dist/img/kmc3.png',
     'logo_img_class' => 'brand-image elevation-3',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
-    'logo_img_alt' => 'KMC TMS',
+    'logo_img_alt' => 'TMIS',
 
     /*
     |--------------------------------------------------------------------------
@@ -87,7 +87,7 @@ return [
         'enabled' => false,
         'img' => [
             'path' => null,
-            'alt' => 'KMC TMS',
+            'alt' => 'TMIS',
             'class' => '',
             'width' => 50,
             'height' => 50,
