@@ -63,7 +63,16 @@ class TrainingInstitutionController extends Controller
 
     public function destroy(TrainingInstitution $trainingInstitution)
     {
-        $trainingInstitution->delete();
+        try {
+            $trainingInstitution->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()
+                    ->route('training-institutions.index')
+                    ->with('error', "Cannot delete \"{$trainingInstitution->name}\" — it has training records attached.");
+            }
+            throw $e;
+        }
 
         return redirect()
             ->route('training-institutions.index')

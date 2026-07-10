@@ -18,6 +18,7 @@ use Maatwebsite\Excel\Validators\Failure;
 class UnplannedTrainingImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
 {
     public array $failures = [];
+    public int $rowsImported = 0;
 
     public function onFailure(Failure ...$failures)
     {
@@ -26,6 +27,8 @@ class UnplannedTrainingImport implements ToModel, WithHeadingRow, WithValidation
 
     public function model(array $row)
     {
+        $this->rowsImported++;
+
         $staff = Staff::where('check_number', $row['check_number'])->first();
         $department = Department::where('name', $row['department'])->first();
         $financialYear = FinancialYear::where('year_name', $row['financial_year'])->first();

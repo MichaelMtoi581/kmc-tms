@@ -143,7 +143,16 @@ class PlannedTrainingController extends Controller
 
     public function destroy(PlannedTraining $plannedTraining)
     {
-        $plannedTraining->delete();
+        try {
+            $plannedTraining->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()
+                    ->route('planned-trainings.index')
+                    ->with('error', 'Cannot delete this training — it is referenced by other records.');
+            }
+            throw $e;
+        }
 
         return redirect()
             ->route('planned-trainings.index')
@@ -165,19 +174,22 @@ class PlannedTrainingController extends Controller
             $import = new PlannedTrainingImport;
             Excel::import($import, $request->file('file'));
 
-            if (!empty($import->failures)) {
+            $imported = $import->rowsImported;
+            $skipped = count($import->failures);
+
+            if ($skipped > 0) {
                 $errors = collect($import->failures)
                     ->map(fn($f) => "Row {$f->row()}: " . implode(', ', $f->errors()))
                     ->join("\n");
                 return redirect()
                     ->route('planned-trainings.index')
-                    ->with('warning', "Import completed, but some rows were skipped:")
+                    ->with('warning', "$imported training(s) imported, $skipped row(s) skipped:")
                     ->with('warning_details', $errors);
             }
 
             return redirect()
                 ->route('planned-trainings.index')
-                ->with('success', 'Trainings imported successfully');
+                ->with('success', "$imported training(s) imported successfully");
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = collect($e->failures())
                 ->map(fn($f) => "Row {$f->row()}: " . implode(', ', $f->errors()))

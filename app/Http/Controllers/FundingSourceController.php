@@ -59,7 +59,16 @@ class FundingSourceController extends Controller
 
     public function destroy(FundingSource $fundingSource)
     {
-        $fundingSource->delete();
+        try {
+            $fundingSource->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()
+                    ->route('funding-sources.index')
+                    ->with('error', "Cannot delete \"{$fundingSource->name}\" — it has training records attached.");
+            }
+            throw $e;
+        }
 
         return redirect()
             ->route('funding-sources.index')

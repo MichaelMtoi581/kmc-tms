@@ -61,7 +61,16 @@ class FinancialYearController extends Controller
 
     public function destroy(FinancialYear $financialYear)
     {
-        $financialYear->delete();
+        try {
+            $financialYear->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()
+                    ->route('financial-years.index')
+                    ->with('error', "Cannot delete \"{$financialYear->year_name}\" — it has training records attached.");
+            }
+            throw $e;
+        }
 
         return redirect()
             ->route('financial-years.index')

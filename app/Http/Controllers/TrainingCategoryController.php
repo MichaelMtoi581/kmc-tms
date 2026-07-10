@@ -57,7 +57,16 @@ class TrainingCategoryController extends Controller
 
     public function destroy(TrainingCategory $trainingCategory)
     {
-        $trainingCategory->delete();
+        try {
+            $trainingCategory->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()
+                    ->route('training-categories.index')
+                    ->with('error', "Cannot delete \"{$trainingCategory->name}\" — it has training records attached.");
+            }
+            throw $e;
+        }
 
         return redirect()
             ->route('training-categories.index')

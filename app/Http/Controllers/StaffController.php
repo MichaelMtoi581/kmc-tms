@@ -80,7 +80,16 @@ class StaffController extends Controller
      */
     public function destroy(Staff $staff)
     {
-        $staff->delete();
+        try {
+            $staff->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()
+                    ->route('staff.index')
+                    ->with('error', "Cannot delete \"{$staff->full_name}\" — this staff member has training records attached.");
+            }
+            throw $e;
+        }
 
         return redirect()
             ->route('staff.index')
