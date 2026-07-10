@@ -23,4 +23,5 @@ return [
     'cost_report' => 'Cost Analysis',
     'status_report' => 'Status Report',
     'duration_report' => 'Duration Report',
+    'user_management' => 'User Management',
 ];

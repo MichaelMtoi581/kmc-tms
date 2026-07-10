@@ -336,6 +336,12 @@ return [
             'icon' => 'fas fa-fw fa-users',
         ],
         [
+            'text' => 'user_management',
+            'route' => 'users.index',
+            'icon' => 'fas fa-fw fa-users-cog',
+            'can' => 'admin',
+        ],
+        [
             'text' => 'departments',
             'route' => 'departments.index',
             'icon' => 'fas fa-fw fa-building',

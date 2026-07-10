@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
 
     // Admin-only CRUD resources
     Route::middleware('role:admin')->group(function () {
+        Route::resource('users', \App\Http\Controllers\UserController::class);
+
         Route::resource('financial-years',
             FinancialYearController::class);
 
