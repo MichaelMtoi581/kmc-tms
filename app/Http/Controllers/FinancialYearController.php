@@ -9,9 +9,11 @@ class FinancialYearController extends Controller
 {
     public function index()
     {
-        $years = FinancialYear::latest()->paginate(10);
+        $years = FinancialYear::orderBy('year_name', 'desc')->get();
+        $totalYears = $years->count();
+        $activeYears = $years->where('is_active', true)->count();
 
-        return view('financial-years.index', compact('years'));
+        return view('financial-years.index', compact('years', 'totalYears', 'activeYears'));
     }
 
     public function create()
