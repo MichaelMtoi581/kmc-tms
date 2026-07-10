@@ -19,6 +19,9 @@ class PlannedTrainingImport implements ToModel, WithHeadingRow, WithValidation, 
 {
     public array $failures = [];
     public int $rowsImported = 0;
+    public int $duplicatesSkipped = 0;
+
+    private array $seen = [];
 
     public function onFailure(Failure ...$failures)
     {
@@ -36,11 +39,28 @@ class PlannedTrainingImport implements ToModel, WithHeadingRow, WithValidation, 
         $institution = TrainingInstitution::where('name', $row['institution'] ?? '')->first();
         $fundingSource = FundingSource::where('name', $row['funding_source'] ?? '')->first();
 
+        $courseTitle = $row['course_title'] ?? $row['training_title'] ?? '';
+        $staffId = $staff?->id;
+        $financialYearId = $financialYear?->id;
+        $key = "{$staffId}|{$courseTitle}|{$financialYearId}";
+
+        if (isset($this->seen[$key]) || PlannedTraining::where('staff_id', $staffId)
+            ->where('course_title', $courseTitle)
+            ->where('financial_year_id', $financialYearId)
+            ->exists()
+        ) {
+            $this->rowsImported--;
+            $this->duplicatesSkipped++;
+            return null;
+        }
+
+        $this->seen[$key] = true;
+
         return new PlannedTraining([
-            'course_title' => $row['course_title'] ?? $row['training_title'] ?? '',
-            'staff_id' => $staff?->id,
+            'course_title' => $courseTitle,
+            'staff_id' => $staffId,
             'department_id' => $department?->id ?? $staff?->department_id,
-            'financial_year_id' => $financialYear?->id,
+            'financial_year_id' => $financialYearId,
             'training_category_id' => $category?->id,
             'training_institution_id' => $institution?->id,
             'funding_source_id' => $fundingSource?->id,

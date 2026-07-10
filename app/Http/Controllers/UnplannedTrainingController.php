@@ -78,7 +78,15 @@ class UnplannedTrainingController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
-        $validated['cost'] = $request->cost ?? 0;
+        $existing = UnplannedTraining::where('staff_id', $validated['staff_id'])
+            ->where('course_title', $validated['course_title'])
+            ->where('financial_year_id', $validated['financial_year_id'])
+            ->exists();
+
+        if ($existing) {
+            return back()->withInput()->with('error', 'This staff member is already registered for this course in the selected financial year.');
+        }
+
         $validated['source'] = 'manual';
 
         UnplannedTraining::create($validated);
@@ -132,6 +140,16 @@ class UnplannedTrainingController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
+        $existing = UnplannedTraining::where('staff_id', $validated['staff_id'])
+            ->where('course_title', $validated['course_title'])
+            ->where('financial_year_id', $validated['financial_year_id'])
+            ->where('id', '!=', $unplannedTraining->id)
+            ->exists();
+
+        if ($existing) {
+            return back()->withInput()->with('error', 'This staff member is already registered for this course in the selected financial year.');
+        }
+
         $validated['cost'] = $request->cost ?? 0;
 
         $unplannedTraining->update($validated);
@@ -176,20 +194,39 @@ class UnplannedTrainingController extends Controller
 
             $imported = $import->rowsImported;
             $skipped = count($import->failures);
+            $duplicates = $import->duplicatesSkipped;
 
+            $parts = [];
+            if ($imported > 0) {
+                $parts[] = "$imported training(s) imported";
+            }
+            if ($duplicates > 0) {
+                $parts[] = "$duplicates duplicate(s) skipped";
+            }
             if ($skipped > 0) {
-                $errors = collect($import->failures)
-                    ->map(fn($f) => "Row {$f->row()}: " . implode(', ', $f->errors()))
-                    ->join("\n");
+                $parts[] = "$skipped row(s) with errors skipped";
+            }
+            $summary = implode(', ', $parts) ?: 'No rows were imported';
+
+            if ($skipped > 0 || $duplicates > 0) {
+                $details = '';
+                if ($duplicates > 0) {
+                    $details .= "Duplicate rows (same staff + course + financial year) were skipped.\n";
+                }
+                if ($skipped > 0) {
+                    $details .= collect($import->failures)
+                        ->map(fn($f) => "Row {$f->row()}: " . implode(', ', $f->errors()))
+                        ->join("\n");
+                }
                 return redirect()
                     ->route('unplanned-trainings.index')
-                    ->with('warning', "$imported training(s) imported, $skipped row(s) skipped:")
-                    ->with('warning_details', $errors);
+                    ->with('warning', $summary . ':')
+                    ->with('warning_details', $details);
             }
 
             return redirect()
                 ->route('unplanned-trainings.index')
-                ->with('success', "$imported training(s) imported successfully");
+                ->with('success', $summary);
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = collect($e->failures())
                 ->map(fn($f) => "Row {$f->row()}: " . implode(', ', $f->errors()))

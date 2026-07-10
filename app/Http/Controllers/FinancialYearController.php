@@ -49,7 +49,7 @@ class FinancialYearController extends Controller
     public function update(Request $request, FinancialYear $financialYear)
     {
         $request->validate([
-            'year_name' => 'required',
+            'year_name' => 'required|unique:financial_years,year_name,' . $financialYear->id,
             'start_date' => 'required',
             'end_date' => 'required',
         ]);
