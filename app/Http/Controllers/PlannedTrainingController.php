@@ -161,10 +161,30 @@ class PlannedTrainingController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        Excel::import(new PlannedTrainingImport, $request->file('file'));
+        try {
+            $import = new PlannedTrainingImport;
+            Excel::import($import, $request->file('file'));
 
-        return redirect()
-            ->route('planned-trainings.index')
-            ->with('success', 'Trainings imported successfully');
+            if (!empty($import->failures)) {
+                $errors = collect($import->failures)
+                    ->map(fn($f) => "Row {$f->row()}: " . implode(', ', $f->errors()))
+                    ->join("\n");
+                return redirect()
+                    ->route('planned-trainings.index')
+                    ->with('warning', "Import completed, but some rows were skipped:")
+                    ->with('warning_details', $errors);
+            }
+
+            return redirect()
+                ->route('planned-trainings.index')
+                ->with('success', 'Trainings imported successfully');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = collect($e->failures())
+                ->map(fn($f) => "Row {$f->row()}: " . implode(', ', $f->errors()))
+                ->join("\n");
+            return back()->with('import_errors', $failures);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Import failed: ' . $e->getMessage());
+        }
     }
 }

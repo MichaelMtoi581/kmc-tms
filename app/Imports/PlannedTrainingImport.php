@@ -9,18 +9,27 @@ use App\Models\PlannedTraining;
 use App\Models\Staff;
 use App\Models\TrainingCategory;
 use App\Models\TrainingInstitution;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Validators\Failure;
 
-class PlannedTrainingImport implements ToModel, WithHeadingRow, WithValidation
+class PlannedTrainingImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
 {
+    public array $failures = [];
+
+    public function onFailure(Failure ...$failures)
+    {
+        $this->failures = array_merge($this->failures, $failures);
+    }
+
     public function model(array $row)
     {
-        $staff = Staff::where('check_number', $row['check_number'] ?? '')->first();
-        $department = Department::where('name', $row['department'] ?? '')->first();
-        $financialYear = FinancialYear::where('year_name', $row['financial_year'] ?? '')->first();
-        $category = TrainingCategory::where('name', $row['category'] ?? '')->first();
+        $staff = Staff::where('check_number', $row['check_number'])->first();
+        $department = Department::where('name', $row['department'])->first();
+        $financialYear = FinancialYear::where('year_name', $row['financial_year'])->first();
+        $category = TrainingCategory::where('name', $row['category'])->first();
         $institution = TrainingInstitution::where('name', $row['institution'] ?? '')->first();
         $fundingSource = FundingSource::where('name', $row['funding_source'] ?? '')->first();
 
@@ -47,7 +56,10 @@ class PlannedTrainingImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             'course_title' => 'required|string|max:255',
-            'check_number' => 'nullable|string|exists:staff,check_number',
+            'check_number' => 'required|string|exists:staff,check_number',
+            'department' => 'required|string|exists:departments,name',
+            'financial_year' => 'required|string|exists:financial_years,year_name',
+            'category' => 'required|string|exists:training_categories,name',
         ];
     }
 

@@ -56,6 +56,23 @@
         </div>
     </div>
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>{{ session('warning') }}</strong>
+            @if(session('warning_details'))
+                <pre class="mb-0 mt-2" style="white-space:pre-wrap;">{{ session('warning_details') }}</pre>
+            @endif
+        </div>
+    @endif
+
     <div class="card card-primary card-outline">
 
         <div class="card-header">

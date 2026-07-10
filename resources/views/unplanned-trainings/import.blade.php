@@ -29,6 +29,20 @@
 
                     <div class="card-body">
 
+                        @if(session('import_errors'))
+                            <div class="alert alert-danger">
+                                <strong>Import failed — the following rows have errors:</strong>
+                                <pre class="mb-0 mt-2" style="white-space:pre-wrap;">{{ session('import_errors') }}</pre>
+                            </div>
+                        @endif
+
+                        @if(session('error'))
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
                         @if($errors->any())
                             <div class="alert alert-danger">
                                 <ul class="mb-0 pl-3">
@@ -88,10 +102,10 @@
                         </thead>
                         <tbody>
                             <tr><td>course_title</td><td><span class="badge badge-success">Yes</span></td><td>Name of the training</td></tr>
-                            <tr><td>check_number</td><td><span class="badge badge-warning">No</span></td><td>Staff check number (must exist)</td></tr>
-                            <tr><td>department</td><td><span class="badge badge-warning">No</span></td><td>Department name (must exist)</td></tr>
-                            <tr><td>financial_year</td><td><span class="badge badge-warning">No</span></td><td>e.g. 2024/2025</td></tr>
-                            <tr><td>category</td><td><span class="badge badge-warning">No</span></td><td>Training category name</td></tr>
+                            <tr><td>check_number</td><td><span class="badge badge-success">Yes</span></td><td>Staff check number (must exist)</td></tr>
+                            <tr><td>department</td><td><span class="badge badge-success">Yes</span></td><td>Department name (must exist)</td></tr>
+                            <tr><td>financial_year</td><td><span class="badge badge-success">Yes</span></td><td>e.g. 2024/2025</td></tr>
+                            <tr><td>category</td><td><span class="badge badge-success">Yes</span></td><td>Training category name</td></tr>
                             <tr><td>institution</td><td><span class="badge badge-warning">No</span></td><td>Institution name</td></tr>
                             <tr><td>funding_source</td><td><span class="badge badge-warning">No</span></td><td>Funding source name</td></tr>
                             <tr><td>start_date</td><td><span class="badge badge-warning">No</span></td><td>dd/mm/yyyy or Excel date</td></tr>
