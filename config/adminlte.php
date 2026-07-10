@@ -331,34 +331,39 @@ return [
         ],
         ['header' => 'organization'],
         [
-            'text' => 'departments',
-            'route' => 'departments.index',
-            'icon' => 'fas fa-fw fa-building',
-        ],
-        [
             'text' => 'staff',
             'route' => 'staff.index',
             'icon' => 'fas fa-fw fa-users',
         ],
         [
+            'text' => 'departments',
+            'route' => 'departments.index',
+            'icon' => 'fas fa-fw fa-building',
+            'can' => 'admin',
+        ],
+        [
             'text' => 'financial_years',
             'route' => 'financial-years.index',
             'icon' => 'fas fa-fw fa-calendar-alt',
+            'can' => 'admin',
         ],
         [
             'text' => 'training_categories',
             'route' => 'training-categories.index',
             'icon' => 'fas fa-fw fa-tags',
+            'can' => 'admin',
         ],
         [
             'text' => 'training_institutions',
             'route' => 'training-institutions.index',
             'icon' => 'fas fa-fw fa-university',
+            'can' => 'admin',
         ],
         [
             'text' => 'funding_sources',
             'route' => 'funding-sources.index',
             'icon' => 'fas fa-fw fa-coins',
+            'can' => 'admin',
         ],
         ['header' => 'trainings'],
         [

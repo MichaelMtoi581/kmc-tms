@@ -24,11 +24,23 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('financial-years',
-        FinancialYearController::class);
+    // Admin-only CRUD resources
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('financial-years',
+            FinancialYearController::class);
 
-    Route::resource('departments',
-        DepartmentController::class);
+        Route::resource('departments',
+            DepartmentController::class);
+
+        Route::resource('training-categories',
+            TrainingCategoryController::class);
+
+        Route::resource('training-institutions',
+            TrainingInstitutionController::class);
+
+        Route::resource('funding-sources',
+            FundingSourceController::class);
+    });
 
     Route::resource('staff',
         StaffController::class);
@@ -51,15 +63,6 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('training-opportunities',
         TrainingOpportunityController::class);
-
-    Route::resource('training-categories',
-        TrainingCategoryController::class);
-
-    Route::resource('training-institutions',
-        TrainingInstitutionController::class);
-
-    Route::resource('funding-sources',
-        FundingSourceController::class);
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ReportController::class, 'index'])->name('index');

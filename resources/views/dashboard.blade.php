@@ -78,6 +78,7 @@
                 <a href="{{ route('reports.staff') }}" class="small-box-footer">Staff Report <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
+        @can('admin')
         <div class="col-lg-3 col-6">
             <div class="small-box bg-teal">
                 <div class="inner">
@@ -88,6 +89,7 @@
                 <a href="{{ route('departments.index') }}" class="small-box-footer">Manage <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
+        @endcan
         <div class="col-lg-3 col-6">
             <div class="small-box bg-orange">
                 <div class="inner">
