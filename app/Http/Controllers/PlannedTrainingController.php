@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Imports\PlannedTrainingImport;
+use App\Models\AuditLog;
 use App\Models\Department;
 use App\Models\FinancialYear;
 use App\Models\FundingSource;
@@ -195,6 +196,15 @@ class PlannedTrainingController extends Controller
             $imported = $import->rowsImported;
             $skipped = count($import->failures);
             $duplicates = $import->duplicatesSkipped;
+
+            AuditLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'imported',
+                'model_type' => PlannedTraining::class,
+                'model_id' => null,
+                'changes' => ['imported' => $imported, 'duplicates' => $duplicates, 'errors' => $skipped],
+                'description' => "Imported $imported planned training(s)" . ($duplicates ? ", $duplicates duplicate(s) skipped" : '') . ($skipped ? ", $skipped error(s)" : ''),
+            ]);
 
             $parts = [];
             if ($imported > 0) {

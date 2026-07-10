@@ -42,6 +42,9 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('funding-sources',
             FundingSourceController::class);
+
+        Route::get('audit-logs', [\App\Http\Controllers\AuditLogController::class, 'index'])
+            ->name('audit-logs.index');
     });
 
     Route::resource('staff',

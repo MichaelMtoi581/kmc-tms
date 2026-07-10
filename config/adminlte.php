@@ -342,6 +342,12 @@ return [
             'can' => 'admin',
         ],
         [
+            'text' => 'audit_log',
+            'route' => 'audit-logs.index',
+            'icon' => 'fas fa-fw fa-history',
+            'can' => 'admin',
+        ],
+        [
             'text' => 'departments',
             'route' => 'departments.index',
             'icon' => 'fas fa-fw fa-building',

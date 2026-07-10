@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\Auditable;
 
 class PlannedTraining extends Model
 {
+    use Auditable;
     protected $fillable = [
         'course_title',
         'staff_id',
@@ -44,6 +46,10 @@ class PlannedTraining extends Model
                 $training->duration_type = $months >= 6 ? 'Long' : 'Short';
             } else {
                 $training->duration_type = 'Short';
+            }
+
+            if ($training->end_date && $training->end_date->isPast() && $training->status !== 'Cancelled') {
+                $training->status = 'Completed';
             }
         });
     }
