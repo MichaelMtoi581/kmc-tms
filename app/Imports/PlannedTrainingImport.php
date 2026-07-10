@@ -39,7 +39,7 @@ class PlannedTrainingImport implements ToModel, WithHeadingRow, WithValidation, 
         $institution = TrainingInstitution::where('name', $row['institution'] ?? '')->first();
         $fundingSource = FundingSource::where('name', $row['funding_source'] ?? '')->first();
 
-        $courseTitle = $row['course_title'] ?? $row['training_title'] ?? '';
+        $courseTitle = strip_tags($row['course_title'] ?? $row['training_title'] ?? '');
         $staffId = $staff?->id;
         $financialYearId = $financialYear?->id;
         $key = "{$staffId}|{$courseTitle}|{$financialYearId}";
@@ -66,12 +66,12 @@ class PlannedTrainingImport implements ToModel, WithHeadingRow, WithValidation, 
             'funding_source_id' => $fundingSource?->id,
             'start_date' => $this->parseDate($row['start_date'] ?? null),
             'end_date' => $this->parseDate($row['end_date'] ?? null),
-            'venue' => $row['venue'] ?? null,
+            'venue' => isset($row['venue']) ? strip_tags($row['venue']) : null,
             'cost' => $row['cost'] ?? 0,
             'status' => 'Planned',
             'source' => 'import',
-            'description' => $row['description'] ?? null,
-            'remarks' => $row['remarks'] ?? null,
+            'description' => isset($row['description']) ? strip_tags($row['description']) : null,
+            'remarks' => isset($row['remarks']) ? strip_tags($row['remarks']) : null,
         ]);
     }
 
@@ -83,6 +83,9 @@ class PlannedTrainingImport implements ToModel, WithHeadingRow, WithValidation, 
             'department' => 'required|string|exists:departments,name',
             'financial_year' => 'required|string|exists:financial_years,year_name',
             'category' => 'required|string|exists:training_categories,name',
+            'institution' => 'nullable|string|exists:training_institutions,name',
+            'funding_source' => 'nullable|string|exists:funding_sources,name',
+            'cost' => 'nullable|numeric|min:0|max:99999999',
         ];
     }
 

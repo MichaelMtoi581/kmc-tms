@@ -233,7 +233,11 @@ class PlannedTrainingController extends Controller
                 ->join("\n");
             return back()->with('import_errors', $failures);
         } catch (\Exception $e) {
-            return back()->with('error', 'Import failed: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Planned training import failed', [
+                'error' => $e->getMessage(),
+                'file' => $request->file('file')->getClientOriginalName(),
+            ]);
+            return back()->with('error', 'Import failed. Please check your file format and try again.');
         }
     }
 }

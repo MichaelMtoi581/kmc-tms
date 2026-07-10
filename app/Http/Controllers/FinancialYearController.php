@@ -54,7 +54,7 @@ class FinancialYearController extends Controller
             'end_date' => 'required',
         ]);
 
-        $financialYear->update($request->all());
+        $financialYear->update($request->only('year_name', 'start_date', 'end_date', 'is_active'));
 
         return redirect()
             ->route('financial-years.index')
