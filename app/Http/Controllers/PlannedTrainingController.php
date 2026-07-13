@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TrainingTemplateExport;
 use App\Imports\PlannedTrainingImport;
 use App\Models\AuditLog;
 use App\Models\Department;
@@ -181,6 +182,11 @@ class PlannedTrainingController extends Controller
     public function importForm()
     {
         return view('planned-trainings.import');
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new TrainingTemplateExport, 'planned-training-import-template.xlsx');
     }
 
     public function importStore(Request $request)

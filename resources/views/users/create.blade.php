@@ -50,11 +50,25 @@
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror" required minlength="8">
+                            <div class="input-group">
+                                <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror" required minlength="8">
+                                <div class="input-group-append">
+                                    <span class="input-group-text" onclick="togglePassword('password', this)" style="cursor:pointer">
+                                        <span class="fas fa-eye"></span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="password_confirmation">Confirm Password</label>
-                            <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required minlength="8">
+                            <div class="input-group">
+                                <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required minlength="8">
+                                <div class="input-group-append">
+                                    <span class="input-group-text" onclick="togglePassword('password_confirmation', this)" style="cursor:pointer">
+                                        <span class="fas fa-eye"></span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer">
@@ -66,4 +80,22 @@
         </div>
     </div>
 
+@stop
+
+@section('js')
+<script>
+function togglePassword(id, btn) {
+    var input = document.getElementById(id);
+    var icon = btn.querySelector('.fas');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
 @stop

@@ -78,6 +78,9 @@
                         <button type="submit" class="btn btn-success">
                             <i class="fas fa-upload mr-1"></i> Import
                         </button>
+                        <a href="{{ route('planned-trainings.import.template') }}" class="btn btn-info">
+                            <i class="fas fa-download mr-1"></i> Download Template
+                        </a>
                         <a href="{{ route('planned-trainings.index') }}" class="btn btn-secondary">
                             Cancel
                         </a>

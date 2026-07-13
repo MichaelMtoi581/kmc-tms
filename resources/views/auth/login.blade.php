@@ -24,13 +24,13 @@
         </div>
 
         <div class="input-group mb-3">
-            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
+            <input type="password" name="password" id="login-password" class="form-control @error('password') is-invalid @enderror"
                 placeholder="Password">
 
             <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-lock"></span>
-                </div>
+                <span class="input-group-text" onclick="togglePassword('login-password', this)" style="cursor:pointer">
+                    <span class="fas fa-eye"></span>
+                </span>
             </div>
 
             @error('password')
@@ -58,4 +58,22 @@
 @stop
 
 @section('auth_footer')
+@stop
+
+@section('js')
+<script>
+function togglePassword(id, btn) {
+    var input = document.getElementById(id);
+    var icon = btn.querySelector('.fas');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
 @stop

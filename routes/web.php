@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('planned-trainings')->name('planned-trainings.')->group(function () {
         Route::get('import', [PlannedTrainingController::class, 'importForm'])->name('import');
         Route::post('import', [PlannedTrainingController::class, 'importStore'])->name('import.store');
+        Route::get('import/template', [PlannedTrainingController::class, 'downloadTemplate'])->name('import.template');
     });
 
     Route::resource('planned-trainings',
@@ -61,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('unplanned-trainings')->name('unplanned-trainings.')->group(function () {
         Route::get('import', [UnplannedTrainingController::class, 'importForm'])->name('import');
         Route::post('import', [UnplannedTrainingController::class, 'importStore'])->name('import.store');
+        Route::get('import/template', [UnplannedTrainingController::class, 'downloadTemplate'])->name('import.template');
     });
 
     Route::resource('unplanned-trainings',
