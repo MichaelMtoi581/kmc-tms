@@ -3,7 +3,6 @@
 @section('title', 'Staff Training Report')
 
 @section('plugins.Datatables', true)
-@section('plugins.Select2', true)
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
@@ -20,24 +19,42 @@
 
     <div class="card card-primary card-outline">
         <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-user mr-1"></i> Select Staff Member</h3>
+            <h3 class="card-title"><i class="fas fa-users mr-1"></i> All Staff Members</h3>
+            <div class="card-tools">
+                <a href="{{ route('reports.staff') }}" class="btn btn-secondary btn-sm {{ $staffId ? '' : 'd-none' }}">
+                    <i class="fas fa-undo mr-1"></i> Clear Selection
+                </a>
+            </div>
         </div>
-        <div class="card-body">
-            <form method="GET" class="form-inline">
-                <div class="form-group mr-2">
-                    <select name="staff_id" class="form-control select2" style="min-width: 350px;" onchange="this.form.submit()">
-                        <option value="">— Select Staff —</option>
-                        @foreach($staffList as $s)
-                            <option value="{{ $s->id }}" {{ $staffId == $s->id ? 'selected' : '' }}>
-                                {{ $s->full_name }} ({{ $s->check_number }}) — {{ $s->department?->name ?? 'N/A' }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                @if($staffId)
-                    <a href="{{ route('reports.staff') }}" class="btn btn-secondary btn-sm"><i class="fas fa-undo mr-1"></i>Clear</a>
-                @endif
-            </form>
+        <div class="card-body p-0">
+            <table id="staff-table" class="table table-bordered table-hover mb-0" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Check No</th>
+                        <th>Full Name</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($staffList as $s)
+                        <tr class="{{ $staffId == $s->id ? 'table-active' : '' }}">
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $s->check_number }}</td>
+                            <td>{{ $s->full_name }}</td>
+                            <td>{{ $s->department?->name ?? '—' }}</td>
+                            <td>{{ $s->designation ?? '—' }}</td>
+                            <td>
+                                <a href="{{ route('reports.staff', ['staff_id' => $s->id]) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye mr-1"></i> View Trainings
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -86,6 +103,7 @@
                 <h3 class="card-title">
                     <i class="fas fa-history mr-1"></i> Training History
                     <span class="badge badge-info ml-2">{{ $staffData->total_trainings }} records</span>
+                    <span class="ml-3 text-muted">— {{ $staffData->staff->full_name }} ({{ $staffData->staff->check_number }})</span>
                 </h3>
                 <div class="card-tools">
                     <a href="{{ route('reports.export', ['type' => 'staff', 'format' => 'xlsx', 'staff_id' => $staffId]) }}" class="btn btn-success btn-sm">
@@ -173,7 +191,18 @@
 @section('js')
 <script>
 $(function () {
-    $('.select2').select2({ theme: 'bootstrap4' });
+    $('#staff-table').DataTable({
+        order: [[1, 'asc']],
+        paging: true,
+        searching: true,
+        info: true,
+        lengthMenu: [10, 25, 50, 100],
+        language: {
+            search: '',
+            searchPlaceholder: 'Search by name, check no, department...',
+            lengthMenu: '_MENU_ per page'
+        }
+    });
 });
 </script>
 @endsection
@@ -189,4 +218,3 @@ $(function () {
 }
 </style>
 @endsection
-
