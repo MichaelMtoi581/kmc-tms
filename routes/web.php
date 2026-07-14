@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
         Route::get('training-summary', [\App\Http\Controllers\ReportController::class, 'trainingSummary'])->name('training-summary');
         Route::get('department', [\App\Http\Controllers\ReportController::class, 'departmentReport'])->name('department');
         Route::get('staff', [\App\Http\Controllers\ReportController::class, 'staffReport'])->name('staff');
+        Route::get('staff/{staff}', [\App\Http\Controllers\ReportController::class, 'staffShow'])->name('staff.show');
         Route::get('financial', [\App\Http\Controllers\ReportController::class, 'financialReport'])->name('financial');
         Route::get('cost', [\App\Http\Controllers\ReportController::class, 'costReport'])->name('cost');
         Route::get('status', [\App\Http\Controllers\ReportController::class, 'statusReport'])->name('status');

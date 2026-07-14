@@ -161,32 +161,35 @@ class ReportController extends Controller
 
     public function staffReport(Request $request)
     {
-        $staffId = $request->staff_id;
-
         $staffList = Staff::with('department')->orderBy('first_name')->get();
 
-        $staffData = null;
-        if ($staffId) {
-            $staffMember = Staff::with('department')->findOrFail($staffId);
-            $planned = PlannedTraining::with([
-                'financialYear', 'trainingCategory', 'trainingInstitution', 'fundingSource',
-            ])->where('staff_id', $staffId)->orderBy('start_date', 'desc')->get();
-            $unplanned = UnplannedTraining::with([
-                'financialYear', 'trainingCategory', 'trainingInstitution', 'fundingSource',
-            ])->where('staff_id', $staffId)->orderBy('start_date', 'desc')->get();
-            $allTrainings = collect($planned)->merge($unplanned)->sortByDesc('start_date');
+        return view('report.staff', compact('staffList'));
+    }
 
-            $staffData = (object) [
-                'staff' => $staffMember,
-                'planned_count' => $planned->count(),
-                'unplanned_count' => $unplanned->count(),
-                'total_trainings' => $allTrainings->count(),
-                'total_cost' => $planned->sum('cost') + $unplanned->sum('cost'),
-                'trainings' => $allTrainings,
-            ];
-        }
+    public function staffShow(Staff $staff)
+    {
+        $staff->load('department');
 
-        return view('report.staff', compact('staffList', 'staffData', 'staffId'));
+        $planned = PlannedTraining::with([
+            'financialYear', 'trainingCategory', 'trainingInstitution', 'fundingSource',
+        ])->where('staff_id', $staff->id)->orderBy('start_date', 'desc')->get();
+
+        $unplanned = UnplannedTraining::with([
+            'financialYear', 'trainingCategory', 'trainingInstitution', 'fundingSource',
+        ])->where('staff_id', $staff->id)->orderBy('start_date', 'desc')->get();
+
+        $allTrainings = collect($planned)->merge($unplanned)->sortByDesc('start_date');
+
+        $staffData = (object) [
+            'staff' => $staff,
+            'planned_count' => $planned->count(),
+            'unplanned_count' => $unplanned->count(),
+            'total_trainings' => $allTrainings->count(),
+            'total_cost' => $planned->sum('cost') + $unplanned->sum('cost'),
+            'trainings' => $allTrainings,
+        ];
+
+        return view('report.staff-show', compact('staffData'));
     }
 
     public function financialReport(Request $request)
