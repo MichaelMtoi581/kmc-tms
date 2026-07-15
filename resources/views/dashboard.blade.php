@@ -4,12 +4,34 @@
 
 @section('plugins.Chartjs', true)
 @section('plugins.Sweetalert2', true)
+@section('plugins.Select2', true)
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-tachometer-alt mr-2"></i>Dashboard</h1>
         <small class="text-muted">{{ now()->format('l, d F Y') }}</small>
     </div>
+    <form method="GET" class="form-inline mt-2">
+        <div class="form-group mr-2">
+            <select name="financial_year_id" class="form-control form-control-sm select2" style="min-width:160px;" onchange="this.form.submit()">
+                <option value="">All Financial Years</option>
+                @foreach($financialYears as $fy)
+                    <option value="{{ $fy->id }}" {{ $fyId == $fy->id ? 'selected' : '' }}>{{ $fy->year_name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="form-group mr-2">
+            <select name="department_id" class="form-control form-control-sm select2" style="min-width:180px;" onchange="this.form.submit()">
+                <option value="">All Departments</option>
+                @foreach($departments as $d)
+                    <option value="{{ $d->id }}" {{ $deptId == $d->id ? 'selected' : '' }}>{{ $d->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        @if($fyId || $deptId)
+            <a href="{{ route('dashboard') }}" class="btn btn-default btn-sm"><i class="fas fa-undo mr-1"></i> Clear</a>
+        @endif
+    </form>
 @stop
 
 @section('content')
@@ -284,6 +306,8 @@
 @section('js')
 <script>
 $(function () {
+    $('.select2').select2({ theme: 'bootstrap4' });
+
     new Chart(document.getElementById('statusChart'), {
         type: 'bar',
         data: {
