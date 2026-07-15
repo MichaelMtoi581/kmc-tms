@@ -84,6 +84,8 @@ Route::middleware('auth')->group(function () {
         Route::get('export/{type}', [\App\Http\Controllers\ReportController::class, 'export'])->name('export');
     });
 
+    Route::get('user-manual', [\App\Http\Controllers\ManualController::class, 'userManual'])->name('user-manual');
+
 });
 
 require __DIR__.'/auth.php';

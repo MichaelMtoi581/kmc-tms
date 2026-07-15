@@ -24,4 +24,6 @@ return [
     'status_report' => 'Status Report',
     'duration_report' => 'Duration Report',
     'user_management' => 'User Management',
+    'audit_log' => 'Audit Log',
+    'user_manual' => 'User Manual',
 ];

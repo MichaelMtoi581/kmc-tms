@@ -429,6 +429,11 @@ return [
             'route' => 'reports.duration',
             'icon' => 'fas fa-fw fa-clock',
         ],
+        [
+            'text' => 'user_manual',
+            'route' => 'user-manual',
+            'icon' => 'fas fa-fw fa-book',
+        ],
     ],
 
     /*
