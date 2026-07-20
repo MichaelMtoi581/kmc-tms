@@ -3,6 +3,7 @@
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\FinancialYearController;
 use App\Http\Controllers\PlannedTrainingController;
+use App\Http\Controllers\UnplannedTrainingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\FundingSourceController;
