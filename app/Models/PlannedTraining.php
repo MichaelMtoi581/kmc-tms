@@ -23,6 +23,7 @@ class PlannedTraining extends Model
         'status',
         'duration_type',
         'source',
+        'tna_exercise_id',
         'description',
         'remarks',
     ];
@@ -82,5 +83,20 @@ class PlannedTraining extends Model
     public function fundingSource()
     {
         return $this->belongsTo(FundingSource::class);
+    }
+
+    public function tnaExercise()
+    {
+        return $this->belongsTo(TnaExercise::class);
+    }
+
+    public function participants()
+    {
+        return $this->hasMany(PlannedTrainingParticipant::class);
+    }
+
+    public function tnaResponses()
+    {
+        return $this->belongsToMany(TnaResponse::class, 'planned_training_participants');
     }
 }
