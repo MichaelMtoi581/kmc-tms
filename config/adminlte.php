@@ -377,17 +377,6 @@ return [
             'icon' => 'fas fa-fw fa-coins',
             'can' => 'admin',
         ],
-        ['header' => 'trainings'],
-        [
-            'text' => 'planned_trainings',
-            'route' => 'planned-trainings.index',
-            'icon' => 'fas fa-fw fa-clipboard-list',
-        ],
-        [
-            'text' => 'unplanned_trainings',
-            'route' => 'unplanned-trainings.index',
-            'icon' => 'fas fa-fw fa-clipboard',
-        ],
         ['header' => 'tna_management'],
         [
             'text' => 'tna_exercises',
@@ -413,6 +402,17 @@ return [
             'text' => 'tna_plan',
             'route' => 'tna.plan.index',
             'icon' => 'fas fa-fw fa-calendar-check',
+        ],
+        ['header' => 'trainings'],
+        [
+            'text' => 'planned_trainings',
+            'route' => 'planned-trainings.index',
+            'icon' => 'fas fa-fw fa-clipboard-list',
+        ],
+        [
+            'text' => 'unplanned_trainings',
+            'route' => 'unplanned-trainings.index',
+            'icon' => 'fas fa-fw fa-clipboard',
         ],
         ['header' => 'reports_header'],
         [
