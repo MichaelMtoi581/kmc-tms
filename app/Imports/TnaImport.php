@@ -28,7 +28,7 @@ class TnaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailu
         $this->failures = array_merge($this->failures, $failures);
     }
 
-    public function model(array $row)
+    public function model(array $row): \Illuminate\Database\Eloquent\Model|array|null
     {
         $this->rowsImported++;
 
