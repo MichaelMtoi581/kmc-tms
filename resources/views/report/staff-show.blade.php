@@ -104,8 +104,8 @@
                             <td>{{ $t->course_title }}</td>
                             <td>{{ $t->financialYear?->year_name ?? '—' }}</td>
                             <td>{{ $t->trainingCategory?->name ?? '—' }}</td>
-                            <td>{{ $t->start_date ? $t->start_date->format('d/m/Y') : '—' }}</td>
-                            <td>{{ $t->end_date ? $t->end_date->format('d/m/Y') : '—' }}</td>
+                            <td>{{ $t->start_period_label ?? ($t->start_date ? $t->start_date->format('d/m/Y') : '—') }}</td>
+                            <td>{{ $t->end_period_label ?? ($t->end_date ? $t->end_date->format('d/m/Y') : '—') }}</td>
                             <td class="text-right">{{ number_format($t->cost, 0) }}</td>
                             <td>
                                 @php

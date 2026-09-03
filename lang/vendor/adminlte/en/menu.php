@@ -26,10 +26,4 @@ return [
     'user_management' => 'User Management',
     'audit_log' => 'Audit Log',
     'user_manual' => 'User Manual',
-    'tna_management' => 'TNA MANAGEMENT',
-    'tna_exercises' => 'TNA Exercises',
-    'tna_import' => 'Import TNA',
-    'tna_responses' => 'TNA Responses',
-    'tna_analysis' => 'TNA Analysis',
-    'tna_plan' => 'Generate Training Plan',
 ];

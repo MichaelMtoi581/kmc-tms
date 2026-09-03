@@ -177,6 +177,13 @@
                         </td>
                         <td class="text-center">
 
+                            @if($training->staff_id === null && $training->department_id !== null)
+                                <a href="{{ route('unplanned-trainings.department', $training->department_id) }}"
+                                   class="btn btn-secondary btn-sm" title="Department trainings">
+                                    <i class="fas fa-building"></i>
+                                </a>
+                            @endif
+
                             <a href="{{ route('unplanned-trainings.show', $training->id) }}"
                                class="btn btn-info btn-sm" title="View">
                                 <i class="fas fa-eye"></i>

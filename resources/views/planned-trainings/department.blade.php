@@ -1,16 +1,17 @@
 @extends('adminlte::page')
 
-@section('title', 'Planned Trainings')
+@section('title', 'Department Trainings')
 
 @section('plugins.Datatables', true)
 @section('plugins.Sweetalert2', true)
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-clipboard-list mr-2"></i>Planned Trainings</h1>
+        <h1><i class="fas fa-building mr-2"></i>{{ $department->name }} — Department Trainings</h1>
         <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-            <li class="breadcrumb-item active">Planned Trainings</li>
+            <li class="breadcrumb-item"><a href="{{ route('planned-trainings.index') }}">Planned Trainings</a></li>
+            <li class="breadcrumb-item active">{{ $department->name }}</li>
         </ol>
     </div>
 @endsection
@@ -22,7 +23,7 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>{{ $trainings->count() }}</h3>
-                    <p>Total Planned</p>
+                    <p>Total Trainings</p>
                 </div>
                 <div class="icon"><i class="fas fa-clipboard-list"></i></div>
             </div>
@@ -56,34 +57,21 @@
         </div>
     </div>
 
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible">
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
-            {{ session('error') }}
-        </div>
-    @endif
-
-    @if(session('warning'))
-        <div class="alert alert-warning alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <strong>{{ session('warning') }}</strong>
-            @if(session('warning_details'))
-                <pre class="mb-0 mt-2" style="white-space:pre-wrap;">{{ session('warning_details') }}</pre>
-            @endif
+            {{ session('success') }}
         </div>
     @endif
 
     <div class="card card-primary card-outline">
 
         <div class="card-header">
-            <h3 class="card-title">All Planned Trainings</h3>
+            <h3 class="card-title">All Trainings for {{ $department->name }}</h3>
 
             <div class="card-tools">
-                <a href="{{ route('planned-trainings.create') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('planned-trainings.create', ['department_id' => $department->id, 'registration_type' => 'department']) }}" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus mr-1"></i> Add Training
-                </a>
-                <a href="{{ route('planned-trainings.import') }}" class="btn btn-success btn-sm">
-                    <i class="fas fa-file-import mr-1"></i> Import
                 </a>
             </div>
         </div>
@@ -102,16 +90,6 @@
                     </select>
                 </div>
                 <div class="form-group mr-2">
-                    <select name="department_id" class="form-control form-control-sm" onchange="this.form.submit()">
-                        <option value="">All Departments</option>
-                        @foreach($departments as $dept)
-                            <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>
-                                {{ $dept->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="form-group mr-2">
                     <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
                         <option value="">All Status</option>
                         <option value="Planned" {{ request('status') == 'Planned' ? 'selected' : '' }}>Planned</option>
@@ -120,25 +98,24 @@
                         <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
                 </div>
-                @if(request()->anyFilled(['financial_year_id', 'department_id', 'status']))
-                    <a href="{{ route('planned-trainings.index') }}" class="btn btn-sm btn-secondary">Clear</a>
+                @if(request()->anyFilled(['financial_year_id', 'status']))
+                    <a href="{{ route('planned-trainings.department', $department->id) }}" class="btn btn-sm btn-secondary">Clear</a>
                 @endif
             </form>
 
-            <table id="trainings-table" class="table table-bordered table-striped" style="width:100%">
+            <table id="department-trainings-table" class="table table-bordered table-striped" style="width:100%">
 
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Course Title</th>
-                        <th>Staff</th>
-                        <th>Department</th>
                         <th>Financial Year</th>
                         <th>Category</th>
+                        <th>Period</th>
                         <th>Duration</th>
                         <th>Cost (TZS)</th>
                         <th>Status</th>
-                        <th class="text-center" style="width:100px">Action</th>
+                        <th class="text-center" style="width:130px">Action</th>
                     </tr>
                 </thead>
 
@@ -153,10 +130,13 @@
                                 {{ $training->course_title }}
                             </a>
                         </td>
-                        <td>{{ $training->staff?->full_name ?? '—' }}</td>
-                        <td>{{ $training->department?->name ?? '—' }}</td>
                         <td>{{ $training->financialYear?->year_name ?? '—' }}</td>
                         <td>{{ $training->trainingCategory?->name ?? '—' }}</td>
+                        <td>
+                            {{ $training->start_period_label ?? $training->start_date?->format('d M Y') ?? '—' }}
+                            &mdash;
+                            {{ $training->end_period_label ?? $training->end_date?->format('d M Y') ?? '—' }}
+                        </td>
                         <td>
                             <span class="badge badge-{{ $training->duration_type === 'Long' ? 'danger' : 'success' }}">
                                 {{ $training->duration_type }}
@@ -176,13 +156,6 @@
                             <span class="badge badge-{{ $badge }}">{{ $training->status }}</span>
                         </td>
                         <td class="text-center">
-
-                            @if($training->staff_id === null && $training->department_id !== null)
-                                <a href="{{ route('planned-trainings.department', $training->department_id) }}"
-                                   class="btn btn-secondary btn-sm" title="Department trainings">
-                                    <i class="fas fa-building"></i>
-                                </a>
-                            @endif
 
                             <a href="{{ route('planned-trainings.show', $training->id) }}"
                                class="btn btn-info btn-sm" title="View">
@@ -211,11 +184,10 @@
                 @empty
 
                     <tr>
-                        <td colspan="10" class="text-center text-muted py-4">
+                        <td colspan="9" class="text-center text-muted py-4">
                             <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                            No planned trainings found.
-                            <a href="{{ route('planned-trainings.create') }}">Add one</a> or
-                            <a href="{{ route('planned-trainings.import') }}">import from Excel</a>.
+                            No department trainings found for {{ $department->name }}.
+                            <a href="{{ route('planned-trainings.create', ['department_id' => $department->id, 'registration_type' => 'department']) }}">Add one</a>.
                         </td>
                     </tr>
 
@@ -234,7 +206,7 @@
 @section('js')
     <script>
         $(function () {
-            $('#trainings-table').DataTable({
+            $('#department-trainings-table').DataTable({
                 order: [[0, 'asc']],
                 language: {
                     search: '',
@@ -249,29 +221,17 @@
                 Swal.fire({
                     title: 'Delete this training?',
                     text: 'This cannot be undone.',
-                    type: 'warning',
+                    icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#dc3545',
                     cancelButtonColor: '#6c757d',
                     confirmButtonText: 'Yes, delete it'
                 }).then((result) => {
-                    if (result.value) {
+                    if (result.isConfirmed) {
                         form.submit();
                     }
                 });
             });
-
-            @if(session('success'))
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    type: 'success',
-                    title: @json(session('success')),
-                    showConfirmButton: false,
-                    timer: 2500,
-                    timerProgressBar: true
-                });
-            @endif
         });
     </script>
 @endsection

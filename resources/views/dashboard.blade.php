@@ -154,7 +154,7 @@
                                     </td>
                                     <td>{{ $t->staff?->full_name ?? '—' }}</td>
                                     <td>{{ $t->department?->name ?? '—' }}</td>
-                                    <td>{{ $t->start_date?->format('d M Y') ?? '—' }}</td>
+                                    <td>{{ $t->start_period_label ?? $t->start_date?->format('d M Y') ?? '—' }}</td>
                                     <td>
                                         <span class="badge badge-{{ $t->duration_type === 'Long' ? 'danger' : 'success' }}">
                                             {{ $t->duration_type }}

@@ -68,9 +68,9 @@
                         <tr>
                             <th>Period</th>
                             <td>
-                                {{ $plannedTraining->start_date?->format('d M Y') ?? '—' }}
+                                {{ $plannedTraining->start_period_label ?? $plannedTraining->start_date?->format('d M Y') ?? '—' }}
                                 &mdash;
-                                {{ $plannedTraining->end_date?->format('d M Y') ?? '—' }}
+                                {{ $plannedTraining->end_period_label ?? $plannedTraining->end_date?->format('d M Y') ?? '—' }}
                             </td>
                         </tr>
                         <tr>

@@ -377,32 +377,6 @@ return [
             'icon' => 'fas fa-fw fa-coins',
             'can' => 'admin',
         ],
-        ['header' => 'tna_management'],
-        [
-            'text' => 'tna_exercises',
-            'route' => 'tna.exercises.index',
-            'icon' => 'fas fa-fw fa-file-alt',
-        ],
-        [
-            'text' => 'tna_import',
-            'route' => 'tna.import.form',
-            'icon' => 'fas fa-fw fa-file-import',
-        ],
-        [
-            'text' => 'tna_responses',
-            'route' => 'tna.responses.index',
-            'icon' => 'fas fa-fw fa-list-alt',
-        ],
-        [
-            'text' => 'tna_analysis',
-            'route' => 'tna.analysis.index',
-            'icon' => 'fas fa-fw fa-chart-bar',
-        ],
-        [
-            'text' => 'tna_plan',
-            'route' => 'tna.plan.index',
-            'icon' => 'fas fa-fw fa-calendar-check',
-        ],
         ['header' => 'trainings'],
         [
             'text' => 'planned_trainings',

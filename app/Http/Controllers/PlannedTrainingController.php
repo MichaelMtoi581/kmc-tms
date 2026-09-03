@@ -39,20 +39,44 @@ class PlannedTrainingController extends Controller
         $trainings = $query->latest()->get();
 
         $financialYears = FinancialYear::orderBy('year_name', 'desc')->get();
-        $departments = Department::orderBy('name')->get();
+        $departments    = Department::orderBy('name')->get();
 
         return view('planned-trainings.index', compact(
             'trainings', 'financialYears', 'departments'
         ));
     }
 
+    public function department(Request $request, Department $department)
+    {
+        $query = PlannedTraining::with([
+            'staff', 'department', 'financialYear',
+            'trainingCategory', 'trainingInstitution', 'fundingSource',
+        ])->where('department_id', $department->id)
+            ->whereNull('staff_id');
+
+        if ($request->filled('financial_year_id')) {
+            $query->where('financial_year_id', $request->financial_year_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $trainings      = $query->latest()->get();
+        $financialYears = FinancialYear::orderBy('year_name', 'desc')->get();
+
+        return view('planned-trainings.department', compact(
+            'department', 'trainings', 'financialYears'
+        ));
+    }
+
     public function create()
     {
-        $staff = Staff::orderBy('first_name')->get();
-        $departments = Department::orderBy('name')->get();
+        $staff         = Staff::orderBy('first_name')->get();
+        $departments   = Department::orderBy('name')->get();
         $financialYears = FinancialYear::orderBy('year_name', 'desc')->get();
-        $categories = TrainingCategory::orderBy('name')->get();
-        $institutions = TrainingInstitution::orderBy('name')->get();
+        $categories    = TrainingCategory::orderBy('name')->get();
+        $institutions  = TrainingInstitution::orderBy('name')->get();
         $fundingSources = FundingSource::orderBy('name')->get();
 
         return view('planned-trainings.create', compact(
@@ -63,33 +87,66 @@ class PlannedTrainingController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'course_title' => 'required|string|max:255',
-            'staff_id' => 'required|exists:staff,id',
-            'department_id' => 'required|exists:departments,id',
-            'financial_year_id' => 'required|exists:financial_years,id',
+        $registrationType = $request->input('registration_type', 'staff');
+
+        // Validation differs by registration type
+        $rules = [
+            'registration_type'    => 'required|in:staff,department',
+            'course_title'         => 'required|string|max:255',
+            'department_id'        => 'required|exists:departments,id',
+            'financial_year_id'    => 'required|exists:financial_years,id',
             'training_category_id' => 'required|exists:training_categories,id',
             'training_institution_id' => 'nullable|exists:training_institutions,id',
-            'funding_source_id' => 'nullable|exists:funding_sources,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'venue' => 'nullable|string|max:255',
-            'cost' => 'nullable|numeric|min:0',
-            'status' => 'required|in:Planned,Ongoing,Completed,Cancelled',
-            'description' => 'nullable|string',
-            'remarks' => 'nullable|string',
-        ]);
+            'funding_source_id'    => 'nullable|exists:funding_sources,id',
+            'start_date'           => 'nullable|date',
+            'end_date'             => 'nullable|date|after_or_equal:start_date',
+            'venue'                => 'nullable|string|max:255',
+            'cost'                 => 'nullable|numeric|min:0',
+            'status'               => 'required|in:Planned,Ongoing,Completed,Cancelled',
+            'description'          => 'nullable|string',
+            'remarks'              => 'nullable|string',
+        ];
 
-        $existing = PlannedTraining::where('staff_id', $validated['staff_id'])
-            ->where('course_title', $validated['course_title'])
-            ->where('financial_year_id', $validated['financial_year_id'])
-            ->exists();
+        // Only require staff_id when registering by staff
+        if ($registrationType === 'staff') {
+            $rules['staff_id'] = 'required|exists:staff,id';
+        } else {
+            $rules['start_month'] = 'required|string';
+            $rules['start_year'] = 'required|string';
+            $rules['end_month'] = 'required|string';
+            $rules['end_year'] = 'required|string';
+        }
 
-        if ($existing) {
-            return back()->withInput()->with('error', 'This staff member is already registered for this course in the selected financial year.');
+        $validated = $request->validate($rules);
+
+        // Set staff_id to null for department-level registrations
+        if ($registrationType === 'department') {
+            $validated['staff_id'] = null;
+            $validated['start_date'] = null;
+            $validated['end_date'] = null;
+        } else {
+            $validated['start_month'] = null;
+            $validated['start_year'] = null;
+            $validated['end_month'] = null;
+            $validated['end_year'] = null;
+        }
+
+        // Duplicate check — only applies when registering by staff
+        if ($registrationType === 'staff') {
+            $existing = PlannedTraining::where('staff_id', $validated['staff_id'])
+                ->where('course_title', $validated['course_title'])
+                ->where('financial_year_id', $validated['financial_year_id'])
+                ->exists();
+
+            if ($existing) {
+                return back()->withInput()->with('error',
+                    'This staff member is already registered for this course in the selected financial year.'
+                );
+            }
         }
 
         $validated['source'] = 'manual';
+        $validated['cost']   = $request->cost ?? 0;
 
         PlannedTraining::create($validated);
 
@@ -110,12 +167,12 @@ class PlannedTrainingController extends Controller
 
     public function edit(PlannedTraining $plannedTraining)
     {
-        $staff = Staff::orderBy('first_name')->get();
-        $departments = Department::orderBy('name')->get();
+        $staff          = Staff::orderBy('first_name')->get();
+        $departments    = Department::orderBy('name')->get();
         $financialYears = FinancialYear::orderBy('year_name', 'desc')->get();
-        $categories = TrainingCategory::orderBy('name')->get();
-        $institutions = TrainingInstitution::orderBy('name')->get();
-        $fundingSources = FundingSource::orderBy('name')->get();
+        $categories     = TrainingCategory::orderBy('name')->get();
+        $institutions   = TrainingInstitution::orderBy('name')->get();
+        $fundingSources  = FundingSource::orderBy('name')->get();
 
         return view('planned-trainings.edit', compact(
             'plannedTraining', 'staff', 'departments', 'financialYears',
@@ -125,31 +182,59 @@ class PlannedTrainingController extends Controller
 
     public function update(Request $request, PlannedTraining $plannedTraining)
     {
-        $validated = $request->validate([
-            'course_title' => 'required|string|max:255',
-            'staff_id' => 'required|exists:staff,id',
-            'department_id' => 'required|exists:departments,id',
-            'financial_year_id' => 'required|exists:financial_years,id',
+        $registrationType = $request->input('registration_type', 'staff');
+
+        $rules = [
+            'registration_type'    => 'required|in:staff,department',
+            'course_title'         => 'required|string|max:255',
+            'department_id'        => 'required|exists:departments,id',
+            'financial_year_id'    => 'required|exists:financial_years,id',
             'training_category_id' => 'required|exists:training_categories,id',
             'training_institution_id' => 'nullable|exists:training_institutions,id',
-            'funding_source_id' => 'nullable|exists:funding_sources,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'venue' => 'nullable|string|max:255',
-            'cost' => 'nullable|numeric|min:0',
-            'status' => 'required|in:Planned,Ongoing,Completed,Cancelled',
-            'description' => 'nullable|string',
-            'remarks' => 'nullable|string',
-        ]);
+            'funding_source_id'    => 'nullable|exists:funding_sources,id',
+            'start_date'           => 'nullable|date',
+            'end_date'             => 'nullable|date|after_or_equal:start_date',
+            'venue'                => 'nullable|string|max:255',
+            'cost'                 => 'nullable|numeric|min:0',
+            'status'               => 'required|in:Planned,Ongoing,Completed,Cancelled',
+            'description'          => 'nullable|string',
+            'remarks'              => 'nullable|string',
+        ];
 
-        $existing = PlannedTraining::where('staff_id', $validated['staff_id'])
-            ->where('course_title', $validated['course_title'])
-            ->where('financial_year_id', $validated['financial_year_id'])
-            ->where('id', '!=', $plannedTraining->id)
-            ->exists();
+        if ($registrationType === 'staff') {
+            $rules['staff_id'] = 'required|exists:staff,id';
+        } else {
+            $rules['start_month'] = 'required|string';
+            $rules['start_year'] = 'required|string';
+            $rules['end_month'] = 'required|string';
+            $rules['end_year'] = 'required|string';
+        }
 
-        if ($existing) {
-            return back()->withInput()->with('error', 'This staff member is already registered for this course in the selected financial year.');
+        $validated = $request->validate($rules);
+
+        if ($registrationType === 'department') {
+            $validated['staff_id'] = null;
+            $validated['start_date'] = null;
+            $validated['end_date'] = null;
+        } else {
+            $validated['start_month'] = null;
+            $validated['start_year'] = null;
+            $validated['end_month'] = null;
+            $validated['end_year'] = null;
+        }
+
+        if ($registrationType === 'staff') {
+            $existing = PlannedTraining::where('staff_id', $validated['staff_id'])
+                ->where('course_title', $validated['course_title'])
+                ->where('financial_year_id', $validated['financial_year_id'])
+                ->where('id', '!=', $plannedTraining->id)
+                ->exists();
+
+            if ($existing) {
+                return back()->withInput()->with('error',
+                    'This staff member is already registered for this course in the selected financial year.'
+                );
+            }
         }
 
         $validated['cost'] = $request->cost ?? 0;
@@ -199,50 +284,42 @@ class PlannedTrainingController extends Controller
             $import = new PlannedTrainingImport;
             Excel::import($import, $request->file('file'));
 
-            $imported = $import->rowsImported;
-            $skipped = count($import->failures);
+            $imported   = $import->rowsImported;
+            $skipped    = count($import->failures);
             $duplicates = $import->duplicatesSkipped;
 
             AuditLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'imported',
-                'model_type' => PlannedTraining::class,
-                'model_id' => null,
-                'changes' => ['imported' => $imported, 'duplicates' => $duplicates, 'errors' => $skipped],
-                'description' => "Imported $imported planned training(s)" . ($duplicates ? ", $duplicates duplicate(s) skipped" : '') . ($skipped ? ", $skipped error(s)" : ''),
+                'user_id'     => auth()->id(),
+                'action'      => 'imported',
+                'model_type'  => PlannedTraining::class,
+                'model_id'    => null,
+                'changes'     => ['imported' => $imported, 'duplicates' => $duplicates, 'errors' => $skipped],
+                'description' => "Imported $imported planned training(s)"
+                    . ($duplicates ? ", $duplicates duplicate(s) skipped" : '')
+                    . ($skipped    ? ", $skipped error(s)" : ''),
             ]);
 
             $parts = [];
-            if ($imported > 0) {
-                $parts[] = "$imported training(s) imported";
-            }
-            if ($duplicates > 0) {
-                $parts[] = "$duplicates duplicate(s) skipped";
-            }
-            if ($skipped > 0) {
-                $parts[] = "$skipped row(s) with errors skipped";
-            }
+            if ($imported > 0)  $parts[] = "$imported training(s) imported";
+            if ($duplicates > 0) $parts[] = "$duplicates duplicate(s) skipped";
+            if ($skipped > 0)   $parts[] = "$skipped row(s) with errors skipped";
             $summary = implode(', ', $parts) ?: 'No rows were imported';
 
             if ($skipped > 0 || $duplicates > 0) {
                 $details = '';
-                if ($duplicates > 0) {
-                    $details .= "Duplicate rows (same staff + course + financial year) were skipped.\n";
-                }
+                if ($duplicates > 0) $details .= "Duplicate rows were skipped.\n";
                 if ($skipped > 0) {
                     $details .= collect($import->failures)
                         ->map(fn($f) => "Row {$f->row()}: " . implode(', ', $f->errors()))
                         ->join("\n");
                 }
-                return redirect()
-                    ->route('planned-trainings.index')
+                return redirect()->route('planned-trainings.index')
                     ->with('warning', $summary . ':')
                     ->with('warning_details', $details);
             }
 
-            return redirect()
-                ->route('planned-trainings.index')
-                ->with('success', $summary);
+            return redirect()->route('planned-trainings.index')->with('success', $summary);
+
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = collect($e->failures())
                 ->map(fn($f) => "Row {$f->row()}: " . implode(', ', $f->errors()))
@@ -251,7 +328,7 @@ class PlannedTrainingController extends Controller
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Planned training import failed', [
                 'error' => $e->getMessage(),
-                'file' => $request->file('file')->getClientOriginalName(),
+                'file'  => $request->file('file')->getClientOriginalName(),
             ]);
             return back()->with('error', 'Import failed. Please check your file format and try again.');
         }

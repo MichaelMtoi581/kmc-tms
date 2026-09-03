@@ -53,31 +53,66 @@
                                 required>
                         </div>
 
+                        @php
+                            // Determine the current registration type from the existing record
+                            $currentRegType = old('registration_type',
+                                $plannedTraining->staff_id ? 'staff' : 'department'
+                            );
+                        @endphp
+
+                        {{-- ── Registration Type Toggle ── --}}
+                        <div class="form-group">
+                            <label class="d-block">Registration Type</label>
+                            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                                <label class="btn btn-outline-primary {{ $currentRegType === 'staff' ? 'active' : '' }}" id="btn-staff">
+                                    <input type="radio" name="registration_type" value="staff"
+                                        {{ $currentRegType === 'staff' ? 'checked' : '' }}>
+                                    <i class="fas fa-user mr-1"></i> By Staff Member
+                                </label>
+                                <label class="btn btn-outline-primary {{ $currentRegType === 'department' ? 'active' : '' }}" id="btn-dept">
+                                    <input type="radio" name="registration_type" value="department"
+                                        {{ $currentRegType === 'department' ? 'checked' : '' }}>
+                                    <i class="fas fa-building mr-1"></i> By Department
+                                </label>
+                            </div>
+                            <small class="form-text text-muted mt-1">
+                                Choose <b>By Staff Member</b> to link training to a specific individual,
+                                or <b>By Department</b> for department-wide trainings with no individual linked.
+                            </small>
+                        </div>
+
                         <div class="row">
-                            <div class="col-md-6">
+                            {{-- Staff field --}}
+                            <div class="col-md-6" id="staff-field">
                                 <div class="form-group">
-                                    <label for="staff_id">Staff</label>
+                                    <label for="staff_id">Staff Member</label>
                                     <select
                                         id="staff_id"
                                         name="staff_id"
                                         class="form-control select2 @error('staff_id') is-invalid @enderror"
-                                        required>
-                                        <option value="">Select Staff</option>
+                                        style="width:100%">
+                                        <option value="">Select Staff Member</option>
                                         @foreach($staff as $s)
                                             <option value="{{ $s->id }}" {{ old('staff_id', $plannedTraining->staff_id) == $s->id ? 'selected' : '' }}>
                                                 {{ $s->full_name }} ({{ $s->check_number }})
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('staff_id')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6">
+
+                            {{-- Department field --}}
+                            <div class="col-md-6" id="department-field">
                                 <div class="form-group">
                                     <label for="department_id">Department</label>
                                     <select
                                         id="department_id"
                                         name="department_id"
                                         class="form-control select2 @error('department_id') is-invalid @enderror"
+                                        style="width:100%"
                                         required>
                                         <option value="">Select Department</option>
                                         @foreach($departments as $dept)
@@ -86,8 +121,17 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('department_id')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
+                        </div>
+
+                        {{-- Department-only note --}}
+                        <div id="dept-note" class="alert alert-info py-2" style="display:none">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            This training is recorded against the selected department only — no individual staff member is linked.
                         </div>
 
                         <div class="row">
@@ -185,8 +229,8 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
+                        <div class="row" id="staff-date-fields">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="start_date">Start Date</label>
                                     <input
@@ -197,7 +241,7 @@
                                         class="form-control @error('start_date') is-invalid @enderror">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="end_date">End Date</label>
                                     <input
@@ -208,6 +252,56 @@
                                         class="form-control @error('end_date') is-invalid @enderror">
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row" id="dept-period-fields" style="display:none">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="start_month">Start Month</label>
+                                    <select id="start_month" name="start_month" class="form-control">
+                                        <option value="">Select Month</option>
+                                        @foreach(['January','February','March','April','May','June','July','August','September','October','November','December'] as $m)
+                                            <option value="{{ $m }}" {{ old('start_month', $plannedTraining->start_month) === $m ? 'selected' : '' }}>{{ $m }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="start_year">Start Year</label>
+                                    <select id="start_year" name="start_year" class="form-control">
+                                        <option value="">Select Year</option>
+                                        @foreach(range(2050, date('Y') - 8) as $y)
+                                            <option value="{{ $y }}" {{ old('start_year', $plannedTraining->start_year) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="end_month">End Month</label>
+                                    <select id="end_month" name="end_month" class="form-control">
+                                        <option value="">Select Month</option>
+                                        @foreach(['January','February','March','April','May','June','July','August','September','October','November','December'] as $m)
+                                            <option value="{{ $m }}" {{ old('end_month', $plannedTraining->end_month) === $m ? 'selected' : '' }}>{{ $m }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="end_year">End Year</label>
+                                    <select id="end_year" name="end_year" class="form-control">
+                                        <option value="">Select Year</option>
+                                        @foreach(range(2050, date('Y') - 8) as $y)
+                                            <option value="{{ $y }}" {{ old('end_year', $plannedTraining->end_year) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="cost">Cost (TZS)</label>
@@ -279,26 +373,71 @@
                 width: '100%'
             });
 
+            // ── Registration type toggle ──────────────────────────────────
+            function applyRegistrationType(type) {
+                if (type === 'department') {
+                    $('#staff-field').hide();
+                    $('#staff_id').val('').trigger('change').prop('required', false);
+                    $('#department-field').removeClass('col-md-6').addClass('col-md-12');
+                    $('#dept-note').show();
+                    $('#staff-date-fields').hide();
+                    $('#dept-period-fields').show();
+                } else {
+                    $('#staff-field').show();
+                    $('#staff_id').prop('required', true);
+                    $('#department-field').removeClass('col-md-12').addClass('col-md-6');
+                    $('#dept-note').hide();
+                    $('#staff-date-fields').show();
+                    $('#dept-period-fields').hide();
+                }
+            }
+
+            // Apply on load (uses the pre-selected value from Blade)
+            var currentType = $('input[name="registration_type"]:checked').val() || 'staff';
+            applyRegistrationType(currentType);
+
+            $('input[name="registration_type"]').on('change', function () {
+                applyRegistrationType($(this).val());
+            });
+
+            // ── Duration badge ────────────────────────────────────────────
+            var MONTHS = {January:1, February:2, March:3, April:4, May:5, June:6, July:7, August:8, September:9, October:10, November:11, December:12};
+
             function calcDuration() {
-                var start = $('#start_date').val();
-                var end = $('#end_date').val();
+                var start  = $('#start_date').val();
+                var end    = $('#end_date').val();
                 var $badge = $('#duration-badge');
 
-                if (start && end) {
-                    var s = new Date(start);
-                    var e = new Date(end);
-                    var months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
-                    if (months >= 6) {
-                        $badge.text('Long').removeClass('badge-success').addClass('badge-danger');
-                    } else {
-                        $badge.text('Short').removeClass('badge-danger').addClass('badge-success');
+                if (!start || !end) {
+                    var sm = MONTHS[$('#start_month').val()];
+                    var sy = parseInt($('#start_year').val(), 10);
+                    var em = MONTHS[$('#end_month').val()];
+                    var ey = parseInt($('#end_year').val(), 10);
+                    if (sm && sy && em && ey) {
+                        var months = (ey - sy) * 12 + (em - sm);
+                        if (months >= 6) {
+                            $badge.text('Long').removeClass('badge-success').addClass('badge-danger');
+                        } else {
+                            $badge.text('Short').removeClass('badge-danger').addClass('badge-success');
+                        }
+                        return;
                     }
+                    $badge.text('Short').removeClass('badge-danger').addClass('badge-success');
+                    return;
+                }
+
+                var s = new Date(start);
+                var e = new Date(end);
+                var months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+                if (months >= 6) {
+                    $badge.text('Long').removeClass('badge-success').addClass('badge-danger');
                 } else {
                     $badge.text('Short').removeClass('badge-danger').addClass('badge-success');
                 }
             }
 
-            $('#start_date, #end_date').on('change', calcDuration);
+            $('#start_date, #end_date, #start_month, #start_year, #end_month, #end_year').on('change', calcDuration);
+            calcDuration(); // run on load to reflect existing dates
         });
     </script>
 @endsection
